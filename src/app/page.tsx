@@ -1,65 +1,70 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border bg-card">
+        <div className="container-shell flex h-16 items-center justify-between">
+          <Link href="/" className="text-lg font-semibold tracking-tight">Blog Platform</Link>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Link href="/login">
+              <Button size="sm">로그인</Button>
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+      </header>
+
+      <main>
+        <section className="container-shell py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <h1 className="text-5xl font-bold tracking-tight md:text-6xl">
+              글쓰기와 발행을
+              <br />
+              한 번에 관리하는 <span className="text-primary">Tech Blog Editor</span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+              강력한 리치 텍스트 에디터와 깔끔한 퍼블리싱 경험을 하나로 제공합니다.
+            </p>
+            <div className="mt-10 flex justify-center gap-4">
+              <Link href="/login">
+                <Button size="lg" className="px-8">무료로 시작하기</Button>
+              </Link>
+              <Link href="#features">
+                <Button variant="outline" size="lg" className="px-8">기능 보기</Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section id="features" className="container-shell pb-20">
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <p className="text-sm font-medium text-primary">Editor</p>
+              <h2 className="mt-2 text-xl font-semibold">문서 중심 작성</h2>
+              <p className="mt-2 text-muted-foreground">
+                직관적인 툴바와 미디어 업로드로 작성 속도를 높입니다.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <p className="text-sm font-medium text-primary">Publishing</p>
+              <h2 className="mt-2 text-xl font-semibold">빠른 발행</h2>
+              <p className="mt-2 text-muted-foreground">
+                초안 저장부터 발행까지 같은 화면에서 즉시 처리할 수 있습니다.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <p className="text-sm font-medium text-primary">Theme</p>
+              <h2 className="mt-2 text-xl font-semibold">일관된 디자인</h2>
+              <p className="mt-2 text-muted-foreground">
+                라이트/다크 모드를 포함한 동일 토큰 기반 UI를 제공합니다.
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
-  );
+  )
 }

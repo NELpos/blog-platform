@@ -1,26 +1,114 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light dark;
+  --background: #f7f8fb;
+  --foreground: #101828;
+  --card: #ffffff;
+  --card-foreground: #101828;
+  --muted: #f2f4f7;
+  --muted-foreground: #667085;
+  --border: #e4e7ec;
+  --primary: #067ff9;
+  --primary-foreground: #ffffff;
+  --accent: #e9f3ff;
+  --accent-foreground: #094067;
+  --code-bg: #f8fbff;
+  --code-border: #c6d4e8;
+  --code-label-bg: #e8f1ff;
+  --code-label-text: #1b63cf;
+  --code-text: #0f172a;
+  --code-comment: #64748b;
+  --code-keyword: #4338ca;
+  --code-string: #047857;
+  --code-number: #b45309;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --font-sans: "Inter", "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0.5rem;
+  z-index: 1000;
+  border-radius: 0.5rem;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+.dark {
+  --background: #0d1117;
+  --foreground: #f2f4f7;
+  --card: #111827;
+  --card-foreground: #f2f4f7;
+  --muted: #1f2937;
+  --muted-foreground: #9ca3af;
+  --border: #273244;
+  --primary: #3b9cff;
+  --primary-foreground: #f8fbff;
+  --accent: #1c2b3e;
+  --accent-foreground: #d9e9ff;
+  --code-bg: #111a2d;
+  --code-border: #305489;
+  --code-label-bg: #1b335a;
+  --code-label-text: #8fb8ff;
+  --code-text: #dbe7ff;
+  --code-comment: #8a96ad;
+  --code-keyword: #9aa7ff;
+  --code-string: #7ed7b2;
+  --code-number: #f9b67d;
+}
+
+.container-shell {
+  @apply mx-auto w-full max-w-screen-xl px-4 md:px-6;
+}
+
+.markdown-renderer pre.md-codeblock code {
+  display: block;
+  background: transparent;
+  margin-top: 0;
+  color: inherit;
+}
+
+.markdown-renderer .code-highlight pre.shiki {
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+}
+
+.markdown-renderer .code-highlight pre.shiki code {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.markdown-renderer iframe {
+  border: 0;
 }
