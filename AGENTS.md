@@ -16,6 +16,8 @@ When references conflict, use this priority:
 - `src/app/studio`, `src/app/studio/new`: focused writing and editing studio
 - `src/app/blog/[workspace_slug]/[post_slug]`: public post page
 - `src/app/api/posts/*`: post CRUD, bulk actions, pending update workflow
+- `src/app/api/public/workspaces/[workspace_slug]/*`: public feed and search event endpoints
+- `src/app/login`, `src/components/auth/*`: Google OAuth + Google One Tap entry points
 - `src/components/blog/PostStudio.tsx`: main studio workflow UI
 - `supabase/*`: schema, RLS, triggers, migrations
 
@@ -37,21 +39,30 @@ Use this map before implementation.
 - Layer 2: `README.md`
 - Layer 3: `tasks/editor-rebuild/04-renderer-integration.md`, `artifacts/04-renderer-integration.md`
 
+### Public Feed / Search
+- Layer 1: `src/app/api/public/workspaces/[workspace_slug]/posts/route.ts`, `src/app/api/public/workspaces/[workspace_slug]/search-events/route.ts`, `src/lib/public/posts.ts`, `src/components/blog/PublicPostFeed.tsx`, `src/components/blog/PublicPostSearchBar.tsx`
+- Layer 2: `README.md`
+- Layer 3: `supabase/migrations/20260218_public_posts_search_fts.sql`, `supabase/migrations/20260218_public_posts_korean_search_trgm.sql`, `supabase/migrations/20260218_public_search_events.sql`
+
+### Auth / Session
+- Layer 1: `src/components/auth/GoogleOneTap.tsx`, `src/components/auth/LoginForm.tsx`, `src/app/auth/callback/route.ts`, `src/lib/supabase/middleware.ts`
+- Layer 2: `docs/SUPABASE_SETUP.md`, `README.md`
+- Layer 3: `tests/e2e/auth.setup.spec.ts`
+
 ### DB / Migration / RLS
 - Layer 1: `supabase/schema.sql`, `supabase/rls.sql`, `supabase/triggers.sql`, `supabase/migrations/*`
 - Layer 2: `docs/SUPABASE_SETUP.md`, `README.md`
 - Layer 3: `tasks/editor-rebuild/01-schema-api.md`, `artifacts/01-schema-api.md`
 
-### Harness Process / Team Workflow
-- Layer 1: `docs/harness/workflow.md`, `docs/harness/roles/*`, `docs/harness/templates/*`
-- Layer 2: `AGENTS.md`, `README.md`
-- Layer 3: `agents/orchestrator/README.md`, `docs/done/*`
 
 ## Build, Test, and Development Commands
 - `pnpm dev`: start local dev server at `http://localhost:3000`
 - `pnpm lint`: run ESLint checks
 - `pnpm build`: production build and type checks
 - `pnpm start`: run built app locally
+- `pnpm e2e:install`: install Playwright Chromium
+- `pnpm e2e:setup`: capture Google OAuth session for E2E
+- `pnpm e2e`: run studio E2E scenario
 
 Before PR:
 - `pnpm lint && pnpm build`
@@ -63,54 +74,17 @@ Before PR:
 - Utilities: lowercase files under `src/lib`
 - Style: single quotes, no semicolons, 2-space indentation
 
-## Harness Engineering Model (Roles)
-1. Orchestration Agent: owns end-to-end flow and approval gates
-2. Frontend Designer Agent: creates Stitch proposal and shadcn feasibility mapping
-3. Beta User Agent: first-time user critique and edge-case feedback
-4. UX Engineer Agent: converts beta feedback into prioritized UX changes
-5. Next.js Dev Lead Agent: decomposes approved work into feature slices and assigns implementation
-6. Next.js Engineer Agent(s): implement slices with tests and report completion
-
-## Approval Gates (2-stage)
-- Gate 1: design direction approved by user
-- Gate 2: implementation-ready spec approved by user
-
-No implementation starts before Gate 2 is approved.
-
-## Task Lifecycle
-1. Intake by Orchestration Agent
-2. Design proposal (`design-proposal`)
-3. Beta feedback (`beta-feedback`)
-4. UX review (`ux-review`)
-5. User approval gates
-6. Execution plan + feature-slice tasks
-7. Implementation and verification
-8. Done report in `docs/done/*`
-
-## Execution Rules
-- Prefer feature-slice parallelization: each slice should include UI/API/data/test impact
-- Avoid overlapping ownership for the same files where possible
-- If blocked, record cause + unblock condition explicitly
-- Keep docs synced when changing routes, APIs, or schema
-
-## Done Reporting
-When a cycle is completed, create a record in:
-- `docs/done/YYYY-MM-DD-<workstream>-done.md`
-
-Minimum fields:
-- scope
-- completed slices
-- verification evidence
-- unresolved risks
-- next actions
-
 ## Testing Guidelines
-No dedicated test runner is configured yet.
-
-Use:
+Primary checks:
 - `pnpm lint`
 - `pnpm build`
-- manual checks for login, dashboard, studio, publish/view flows
+- `pnpm e2e` (after `pnpm e2e:setup` when auth state is missing)
+
+Manual checks:
+- login (Google OAuth / One Tap fallback)
+- dashboard post index (search, bulk actions)
+- studio save/publish/view workflow
+- public blog feed/search and post page rendering
 
 ## Commit & PR Guidelines
 - Use clear imperative commit messages
