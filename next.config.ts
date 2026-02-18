@@ -1,6 +1,9 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
+
+const isReactCompilerEnabled = process.env.REACT_COMPILER === 'true'
 
 const nextConfig: NextConfig = {
+  reactCompiler: isReactCompilerEnabled,
   images: {
     remotePatterns: [
       {
@@ -13,6 +16,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig

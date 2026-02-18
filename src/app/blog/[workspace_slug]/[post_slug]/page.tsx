@@ -37,7 +37,7 @@ export default async function BlogPostPage({
 
   const markdownQuery = await supabase
     .from('posts')
-    .select('id, title, slug, content_markdown, cover_image_url, published_at, profiles(display_name, avatar_url)')
+    .select('id, title, live_title, slug, content_markdown, live_content_markdown, cover_image_url, published_at, profiles(display_name, avatar_url)')
     .eq('workspace_id', workspace.id)
     .eq('slug', post_slug)
     .eq('published', true)
@@ -56,7 +56,33 @@ export default async function BlogPostPage({
   if (!markdownQuery.error && markdownQuery.data) {
     post = {
       ...markdownQuery.data,
-      content_markdown: markdownQuery.data.content_markdown ?? '',
+      title: markdownQuery.data.live_title ?? markdownQuery.data.title,
+      content_markdown: markdownQuery.data.live_content_markdown ?? markdownQuery.data.content_markdown ?? '',
+    }
+  } else if (markdownQuery.error && (isMissingColumnError(markdownQuery.error, 'live_title') || isMissingColumnError(markdownQuery.error, 'live_content_markdown'))) {
+    const fallbackQuery = await supabase
+      .from('posts')
+      .select('id, title, slug, content_markdown, cover_image_url, published_at, profiles(display_name, avatar_url)')
+      .eq('workspace_id', workspace.id)
+      .eq('slug', post_slug)
+      .eq('published', true)
+      .maybeSingle()
+
+    if (fallbackQuery.error) {
+      console.error('Failed to load fallback published post for public blog post', {
+        workspaceId: workspace.id,
+        workspaceSlug: workspace_slug,
+        postSlug: post_slug,
+        error: fallbackQuery.error,
+      })
+      throw new Error('Failed to load post')
+    }
+
+    if (fallbackQuery.data) {
+      post = {
+        ...fallbackQuery.data,
+        content_markdown: fallbackQuery.data.content_markdown ?? '',
+      }
     }
   } else if (markdownQuery.error && isMissingColumnError(markdownQuery.error, 'content_markdown')) {
     const legacyQuery = await supabase
@@ -115,7 +141,7 @@ export default async function BlogPostPage({
       </header>
 
       <main className="container-shell py-12 md:py-16">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-[1fr_minmax(0,760px)_1fr]">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-[1fr_minmax(0,880px)_1fr] xl:grid-cols-[1fr_minmax(0,940px)_1fr]">
           <div aria-hidden="true" />
           <div className="min-w-0 lg:px-4">
             <section className="rounded-2xl border border-border/80 bg-card/45 px-5 py-7 shadow-sm backdrop-blur-sm md:px-8 md:py-9">

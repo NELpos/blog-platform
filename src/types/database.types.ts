@@ -72,6 +72,9 @@ export interface Database {
           title: string
           slug: string
           content_markdown: string
+          live_title: string | null
+          live_content_markdown: string
+          published_version_id: string | null
           cover_image_url: string | null
           published: boolean
           published_at: string | null
@@ -85,6 +88,9 @@ export interface Database {
           title: string
           slug: string
           content_markdown?: string
+          live_title?: string | null
+          live_content_markdown?: string
+          published_version_id?: string | null
           cover_image_url?: string | null
           published?: boolean
           published_at?: string | null
@@ -98,11 +104,46 @@ export interface Database {
           title?: string
           slug?: string
           content_markdown?: string
+          live_title?: string | null
+          live_content_markdown?: string
+          published_version_id?: string | null
           cover_image_url?: string | null
           published?: boolean
           published_at?: string | null
           created_at?: string
           updated_at?: string
+        }
+      }
+      post_versions: {
+        Row: {
+          id: string
+          post_id: string
+          workspace_id: string
+          author_id: string
+          version_number: number
+          title: string
+          content_markdown: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          workspace_id: string
+          author_id: string
+          version_number: number
+          title: string
+          content_markdown?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          workspace_id?: string
+          author_id?: string
+          version_number?: number
+          title?: string
+          content_markdown?: string
+          created_at?: string
         }
       }
       media: {

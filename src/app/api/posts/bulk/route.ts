@@ -51,6 +51,7 @@ export async function POST(request: Request) {
       .update({
         published: false,
         published_at: null,
+        published_version_id: null,
         updated_at: new Date().toISOString(),
       })
       .in('id', ids)
@@ -79,7 +80,9 @@ export async function POST(request: Request) {
   }
 
   const targets = targetResult.data ?? []
-  const publishedTargets = targets.filter((post) => post.published).map((post) => post.id)
+  const publishedTargets = targets
+    .filter((post) => post.published === true)
+    .map((post) => post.id)
   if (publishedTargets.length > 0) {
     return NextResponse.json(
       {
@@ -100,16 +103,26 @@ export async function POST(request: Request) {
     .delete()
     .in('id', deletableIds)
     .eq('author_id', user.id)
-    .eq('published', false)
     .select('id')
 
   if (deleteResult.error) {
     return errorResponse(deleteResult.error)
   }
 
+  const affectedIds = (deleteResult.data ?? []).map((post) => post.id)
+  if (deletableIds.length > 0 && affectedIds.length === 0) {
+    return NextResponse.json(
+      {
+        error: 'No draft posts were deleted. Please refresh and try again.',
+        requested_ids: deletableIds,
+      },
+      { status: 409 },
+    )
+  }
+
   return NextResponse.json({
     success: true,
     action,
-    affected_ids: (deleteResult.data ?? []).map((post) => post.id),
+    affected_ids: affectedIds,
   })
 }

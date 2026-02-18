@@ -119,25 +119,33 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
   const imageUrlInputRef = useRef<HTMLInputElement | null>(null)
   const lastFocusedElementRef = useRef<HTMLElement | null>(null)
   const onChangeRef = useRef(onChange)
-  const isHydratingRef = useRef(true)
+  const valueRef = useRef(value)
+  const prevInitialContentRef = useRef(initialContent)
+  const isComposingRef = useRef(false)
 
   useEffect(() => {
     onChangeRef.current = onChange
   }, [onChange])
 
   useEffect(() => {
-    isHydratingRef.current = true
+    if (initialContent === prevInitialContentRef.current) return
+    prevInitialContentRef.current = initialContent
+    if (initialContent === valueRef.current) return
+    if (typeof document !== 'undefined' && document.activeElement === textareaRef.current) return
+
+    valueRef.current = initialContent
     setValue(initialContent)
     setSlashMatch(null)
   }, [initialContent])
 
-  useEffect(() => {
-    if (isHydratingRef.current) {
-      isHydratingRef.current = false
-      return
+  const commitValue = (nextValue: string, options?: { notify?: boolean }) => {
+    const notify = options?.notify ?? true
+    valueRef.current = nextValue
+    setValue(nextValue)
+    if (notify && !isComposingRef.current) {
+      onChangeRef.current?.(nextValue)
     }
-    onChangeRef.current?.(value)
-  }, [value])
+  }
 
   const selection = useMemo(() => {
     const textarea = textareaRef.current
@@ -154,7 +162,7 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
     const end = textarea?.selectionEnd ?? selection.end
     const result = updater(start, end)
 
-    setValue(result.next)
+    commitValue(result.next)
 
     requestAnimationFrame(() => {
       if (!textareaRef.current) return
@@ -202,6 +210,10 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
 
   const insertTable = () => {
     insertBlock('| Column 1 | Column 2 |\n| --- | --- |\n| Value 1 | Value 2 |')
+  }
+
+  const insertMermaid = () => {
+    insertBlock('```mermaid\nflowchart TD\n  A[Start] --> B[Done]\n```')
   }
 
   const setLink = () => {
@@ -277,7 +289,7 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
     if (!slashMatch) return
     const next = `${value.slice(0, slashMatch.start)}${replacement}${value.slice(slashMatch.end)}`
     const cursor = slashMatch.start + cursorOffset
-    setValue(next)
+    commitValue(next)
     closeSlashMenu()
 
     requestAnimationFrame(() => {
@@ -296,7 +308,7 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
     const replacement = `${needsLeadingBreak ? '\n\n' : ''}${block}${needsTrailingBreak ? '\n\n' : ''}`
     const cursor = slashMatch.start + replacement.length
 
-    setValue(`${before}${replacement}${after}`)
+    commitValue(`${before}${replacement}${after}`)
     closeSlashMenu()
 
     requestAnimationFrame(() => {
@@ -354,6 +366,14 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
       keywords: ['code', 'snippet', 'block'],
       icon: <Code2 className="h-4 w-4" />,
       run: () => applySlashBlock('```ts\n// code\n```'),
+    },
+    {
+      id: 'mermaid',
+      label: 'Mermaid Diagram',
+      description: 'Insert a mermaid diagram block',
+      keywords: ['mermaid', 'diagram', 'flowchart', 'graph'],
+      icon: <Code2 className="h-4 w-4" />,
+      run: () => applySlashBlock('```mermaid\nflowchart TD\n  A[Start] --> B[Done]\n```'),
     },
     {
       id: 'table',
@@ -453,7 +473,7 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
 
   const handleTextareaChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const nextValue = event.target.value
-    setValue(nextValue)
+    commitValue(nextValue)
     updateSlashBySelection(nextValue, event.target.selectionStart, event.target.selectionEnd)
   }
 
@@ -552,6 +572,9 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
           <ToolbarButton label="Code Block" onClick={() => insertBlock('```ts\n// code\n```')}>
             <span className="font-mono text-xs">&lt;/&gt;</span>
           </ToolbarButton>
+          <ToolbarButton label="Mermaid Diagram" onClick={insertMermaid}>
+            <span className="font-mono text-[10px] font-semibold">MMD</span>
+          </ToolbarButton>
           <ToolbarButton label="Table" onClick={insertTable}>
             <Table2 className="h-4 w-4" />
           </ToolbarButton>
@@ -586,6 +609,15 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
           ref={textareaRef}
           value={value}
           onChange={handleTextareaChange}
+          onCompositionStart={() => {
+            isComposingRef.current = true
+          }}
+          onCompositionEnd={(event) => {
+            isComposingRef.current = false
+            const nextValue = event.currentTarget.value
+            valueRef.current = nextValue
+            onChangeRef.current?.(nextValue)
+          }}
           onKeyDown={handleTextareaKeyDown}
           onPaste={handleTextareaPaste}
           onClick={(event) => updateSlashBySelection(event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget.selectionEnd)}
@@ -654,7 +686,10 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
           <code>@[video](https://...)&#123;provider=&quot;youtube&quot;,title=&quot;...&quot;&#125;</code>
         </p>
         <p>
-          Slash commands: <code>/code /table /image /bullet /ordered /quote /heading /link /video</code>
+          Mermaid block: <code>{'```mermaid ... ```'}</code>
+        </p>
+        <p>
+          Slash commands: <code>/code /mermaid /table /image /bullet /ordered /quote /heading /link /video</code>
         </p>
         <p>
           Paste image: <code>Ctrl/Cmd + V</code> (클립보드 이미지를 자동 업로드 후 Image toolbox에 채웁니다)

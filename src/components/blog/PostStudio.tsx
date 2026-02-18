@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { toast } from 'sonner'
-import { Check, ExternalLink, EyeOff, Keyboard, Loader2, Search, Trash2 } from 'lucide-react'
+import { ArrowLeft, Check, ChevronDown, Copy, ExternalLink, EyeOff, Keyboard, Loader2, Search, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Kbd } from '@/components/ui/kbd'
@@ -22,13 +24,19 @@ type StudioPost = {
   content_markdown: string | null
   live_title?: string | null
   live_content_markdown?: string | null
+  published_version_id?: string | null
+  versions?: PostVersion[]
   published: boolean
   published_at: string | null
-  has_pending_changes?: boolean | null
-  pending_title?: string | null
-  pending_content_markdown?: string | null
-  pending_updated_at?: string | null
   updated_at: string
+}
+
+type PostVersion = {
+  id: string
+  version_number: number
+  title: string
+  content_markdown: string
+  created_at: string
 }
 
 interface PostStudioProps {
@@ -41,6 +49,7 @@ interface PostStudioProps {
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 type StudioMode = 'edit' | 'preview'
+type SavedSnapshot = { title: string; content: string }
 
 type ApiErrorPayload = {
   error?: string
@@ -81,16 +90,16 @@ function formatRelativeTime(iso: string): string {
 }
 
 export default function PostStudio({ workspace, initialPosts }: PostStudioProps) {
-  const DRAFT_STORAGE_PREFIX = 'post-studio:draft:'
+  const router = useRouter()
   const [posts, setPosts] = useState<StudioPost[]>(initialPosts)
   const [selectedPostId, setSelectedPostId] = useState<string | null>(initialPosts[0]?.id ?? null)
   const [mode, setMode] = useState<StudioMode>('edit')
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved')
-  const [isPublishing, setIsPublishing] = useState(false)
-  const [isPublishingPending, setIsPublishingPending] = useState(false)
-  const [isDiscardingPending, setIsDiscardingPending] = useState(false)
+  const [isPublishingVersionId, setIsPublishingVersionId] = useState<string | null>(null)
+  const [selectedPublishVersionId, setSelectedPublishVersionId] = useState<string>('')
+  const [isPublishVersionMenuOpen, setIsPublishVersionMenuOpen] = useState(false)
   const [isUnpublishing, setIsUnpublishing] = useState(false)
-  const [isDeletingDraft, setIsDeletingDraft] = useState(false)
+  const [isDeletingPost, setIsDeletingPost] = useState(false)
   const [isShortcutHelpOpen, setIsShortcutHelpOpen] = useState(false)
   const [isCommandOpen, setIsCommandOpen] = useState(false)
   const [commandQuery, setCommandQuery] = useState('')
@@ -101,8 +110,13 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
   const [contentLoadError, setContentLoadError] = useState<string | null>(null)
   const [contentFetchNonce, setContentFetchNonce] = useState(0)
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
-  const [lastDraftSavedAt, setLastDraftSavedAt] = useState<string | null>(null)
-  const draftRestoredPostRef = useRef<string | null>(null)
+  const [savedSnapshots, setSavedSnapshots] = useState<Record<string, SavedSnapshot>>({})
+  const [draftTitle, setDraftTitle] = useState(initialPosts[0]?.title ?? '')
+  const [isDraftDirty, setIsDraftDirty] = useState(false)
+  const latestDraftTitleRef = useRef('')
+  const latestDraftContentRef = useRef('')
+  const hasLocalDraftChangesRef = useRef(false)
+  const hydratedPostIdsRef = useRef<Set<string>>(new Set())
   const shortcutPopoverRef = useRef<HTMLDivElement | null>(null)
   const commandInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -116,6 +130,81 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
     if (!normalized) return posts
     return posts.filter((post) => (post.title || 'untitled').toLowerCase().includes(normalized))
   }, [commandQuery, posts])
+
+  const selectedSnapshot = useMemo(
+    () => (selectedPostId ? savedSnapshots[selectedPostId] ?? null : null),
+    [savedSnapshots, selectedPostId],
+  )
+
+  const hasSelectedUnsavedChanges = isDraftDirty
+
+  const selectedVersions = useMemo(
+    () => [...(selectedPost?.versions ?? [])].sort((a, b) => b.version_number - a.version_number),
+    [selectedPost],
+  )
+
+  const selectedPublishVersion = useMemo(
+    () => selectedVersions.find((version) => version.id === selectedPublishVersionId) ?? null,
+    [selectedPublishVersionId, selectedVersions],
+  )
+
+  const publishedVersion = useMemo(
+    () => selectedVersions.find((version) => version.id === selectedPost?.published_version_id) ?? null,
+    [selectedPost?.published_version_id, selectedVersions],
+  )
+
+  const previewTitle = useMemo(() => {
+    if (!selectedPost) return 'Untitled'
+    if (!selectedPost.published) {
+      return selectedPost.title || 'Untitled'
+    }
+    return selectedPublishVersion?.title ?? selectedPost.live_title ?? selectedPost.title ?? 'Untitled'
+  }, [selectedPost, selectedPublishVersion?.title])
+
+  const previewContentMarkdown = useMemo(() => {
+    if (!selectedPost) return ''
+    if (!selectedPost.published) {
+      return selectedPost.content_markdown ?? ''
+    }
+    return selectedPublishVersion?.content_markdown
+      ?? selectedPost.live_content_markdown
+      ?? selectedPost.content_markdown
+      ?? ''
+  }, [selectedPost, selectedPublishVersion?.content_markdown])
+
+  const previewVersionStatus = useMemo(() => {
+    const currentLabel = selectedPublishVersion ? `v${selectedPublishVersion.version_number}` : '최신 Draft'
+    const publishLabel = selectedPost?.published && publishedVersion ? `v${publishedVersion.version_number}` : null
+
+    if (!publishLabel) {
+      return `현재 비공개 · 현재 버전 ${currentLabel}`
+    }
+
+    if (selectedPublishVersion && publishedVersion) {
+      if (selectedPublishVersion.version_number === publishedVersion.version_number) {
+        return '게시중'
+      }
+
+      if (selectedPublishVersion.version_number > publishedVersion.version_number) {
+        return `현재 버전 ${currentLabel} (미게시) · Publish 버전 ${publishLabel}`
+      }
+    }
+
+    return `현재 버전 ${currentLabel} · Publish 버전 ${publishLabel}`
+  }, [publishedVersion, selectedPost?.published, selectedPublishVersion])
+
+  const setSavedSnapshot = useCallback((postId: string, title: string, content: string) => {
+    setSavedSnapshots((current) => {
+      const previous = current[postId]
+      if (previous && previous.title === title && previous.content === content) {
+        return current
+      }
+      return {
+        ...current,
+        [postId]: { title, content },
+      }
+    })
+  }, [])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -140,10 +229,40 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
   }, [posts, selectedPostId])
 
   useEffect(() => {
+    if (!selectedPost) return
+    latestDraftTitleRef.current = selectedPost.title
+    latestDraftContentRef.current = toContentString(selectedPost.content_markdown)
+    setDraftTitle(selectedPost.title)
+    setIsDraftDirty(false)
+    hasLocalDraftChangesRef.current = false
+  }, [selectedPost])
+
+  useEffect(() => {
+    if (!selectedPostId || !selectedSnapshot) return
+    const isDirty = (
+      latestDraftTitleRef.current !== selectedSnapshot.title
+      || latestDraftContentRef.current !== selectedSnapshot.content
+    )
+    setIsDraftDirty(isDirty)
+  }, [selectedPostId, selectedSnapshot])
+
+  useEffect(() => {
+    const defaultVersionId = selectedVersions[0]?.id ?? ''
+    if (!defaultVersionId) {
+      setSelectedPublishVersionId('')
+      return
+    }
+    if (!selectedPublishVersionId || !selectedVersions.some((version) => version.id === selectedPublishVersionId)) {
+      setSelectedPublishVersionId(defaultVersionId)
+    }
+  }, [selectedPublishVersionId, selectedVersions])
+
+  useEffect(() => {
     if (!selectedPostId) return
-    const selected = posts.find((post) => post.id === selectedPostId)
+    const selected = selectedPost
     if (!selected) return
-    if (selected.content_markdown !== null) {
+    const wasHydrated = hydratedPostIdsRef.current.has(selectedPostId)
+    if (wasHydrated && selected.content_markdown !== null) {
       setContentLoadError(null)
       setIsContentLoading(false)
       return
@@ -168,21 +287,32 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
             post.id === selectedPostId
               ? {
                 ...post,
-                content_markdown: loadedPost.content_markdown ?? '',
+                ...(hasLocalDraftChangesRef.current
+                  ? {
+                    title: latestDraftTitleRef.current,
+                    content_markdown: latestDraftContentRef.current,
+                  }
+                  : {
+                    title: loadedPost.title ?? post.title,
+                    content_markdown: loadedPost.content_markdown ?? '',
+                  }),
                 live_title: loadedPost.live_title ?? loadedPost.title ?? post.title,
                 live_content_markdown: loadedPost.live_content_markdown ?? loadedPost.content_markdown ?? post.content_markdown ?? '',
-                title: loadedPost.title ?? post.title,
+                versions: Array.isArray(loadedPost.versions) ? loadedPost.versions as PostVersion[] : (post.versions ?? []),
+                published_version_id: typeof loadedPost.published_version_id === 'string' ? loadedPost.published_version_id : (loadedPost.published_version_id === null ? null : (post.published_version_id ?? null)),
                 slug: loadedPost.slug ?? post.slug,
                 published: loadedPost.published ?? post.published,
                 published_at: loadedPost.published_at ?? post.published_at,
-                has_pending_changes: loadedPost.has_pending_changes ?? false,
-                pending_title: loadedPost.pending_title ?? null,
-                pending_content_markdown: loadedPost.pending_content_markdown ?? null,
-                pending_updated_at: loadedPost.pending_updated_at ?? null,
                 updated_at: loadedPost.updated_at ?? post.updated_at,
               }
               : post,
           ),
+        )
+        hydratedPostIdsRef.current.add(selectedPostId)
+        setSavedSnapshot(
+          selectedPostId,
+          loadedPost.title ?? selected.title,
+          toContentString(loadedPost.content_markdown ?? selected.content_markdown),
         )
       } catch {
         if (cancelled) return
@@ -200,47 +330,24 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
     return () => {
       cancelled = true
     }
-  }, [contentFetchNonce, posts, selectedPostId])
+  }, [contentFetchNonce, selectedPost, selectedPostId, setSavedSnapshot])
 
   useEffect(() => {
-    if (!selectedPostId) return
-    const selected = posts.find((post) => post.id === selectedPostId)
-    if (!selected) return
-    if (draftRestoredPostRef.current === selectedPostId) return
-    draftRestoredPostRef.current = selectedPostId
+    if (!selectedPostId || !selectedPost) return
+    if (selectedPost.content_markdown === null) return
+    if (savedSnapshots[selectedPostId]) return
+    setSavedSnapshot(
+      selectedPostId,
+      selectedPost.title,
+      toContentString(selectedPost.content_markdown),
+    )
+  }, [savedSnapshots, selectedPost, selectedPostId, setSavedSnapshot])
 
-    const draftRaw = window.localStorage.getItem(`${DRAFT_STORAGE_PREFIX}${selectedPostId}`)
-    if (!draftRaw) return
-
-    try {
-      const draft = JSON.parse(draftRaw) as Partial<StudioPost> & { saved_at?: string }
-      const nextTitle = typeof draft.title === 'string' ? draft.title : selected.title
-      const nextContent = typeof draft.content_markdown === 'string'
-        ? draft.content_markdown
-        : toContentString(selected.content_markdown)
-      const nextPublished = typeof draft.published === 'boolean' ? draft.published : selected.published
-      const hasMeaningfulDiff = nextTitle !== selected.title || nextContent !== toContentString(selected.content_markdown)
-      if (!hasMeaningfulDiff) return
-
-      const shouldRestore = window.confirm('로컬에 저장된 자동 Draft가 있습니다. 복원하시겠습니까?')
-      if (!shouldRestore) return
-
-      const now = new Date().toISOString()
-      setPosts((current) =>
-        current.map((post) =>
-          post.id === selectedPostId
-            ? { ...post, title: nextTitle, content_markdown: nextContent, published: nextPublished, updated_at: now }
-            : post,
-        ),
-      )
-      setMode('edit')
-      setSaveStatus('idle')
-      setLastDraftSavedAt(draft.saved_at ?? now)
-      toast.success('로컬 Draft를 복원했습니다.')
-    } catch {
-      window.localStorage.removeItem(`${DRAFT_STORAGE_PREFIX}${selectedPostId}`)
-    }
-  }, [posts, selectedPostId])
+  useEffect(() => {
+    if (!selectedPost) return
+    if (saveStatus === 'saving' || saveStatus === 'error') return
+    setSaveStatus(hasSelectedUnsavedChanges ? 'idle' : 'saved')
+  }, [hasSelectedUnsavedChanges, saveStatus, selectedPost])
 
   useEffect(() => {
     if (!isSearchStateHydrated) return
@@ -280,39 +387,124 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
     return window.confirm('저장되지 않은 변경사항이 있습니다. 이동하시겠습니까?')
   }
 
-  const saveDraftToLocal = (postId: string, title: string, contentMarkdown: string, published: boolean) => {
-    const savedAt = new Date().toISOString()
-    window.localStorage.setItem(
-      `${DRAFT_STORAGE_PREFIX}${postId}`,
-      JSON.stringify({
-        title,
-        content_markdown: contentMarkdown,
-        published,
-        saved_at: savedAt,
-      }),
-    )
-    setLastDraftSavedAt(savedAt)
-  }
-
   const handleSavePost = useCallback(async (
-    options: { switchToPreview?: boolean; silent?: boolean; saveMode?: 'direct' | 'draft_update' } = {},
+    options: { switchToPreview?: boolean; silent?: boolean } = {},
   ) => {
-    const { switchToPreview = true, silent = false, saveMode } = options
-    if (!selectedPostId || !selectedPost) return false
+    const { switchToPreview = false, silent = false } = options
+    if (!selectedPostId || !selectedPost) return { success: false as const, versionId: null as string | null }
+    const currentTitle = latestDraftTitleRef.current
+    const currentContent = latestDraftContentRef.current
+    const hasUnsavedNow = selectedSnapshot
+      ? (currentTitle !== selectedSnapshot.title || currentContent !== selectedSnapshot.content)
+      : (currentTitle !== selectedPost.title || currentContent !== toContentString(selectedPost.content_markdown))
+
+    if (!hasUnsavedNow) {
+      if (switchToPreview) setMode('preview')
+      if (!silent) toast.info('변경된 내용이 없습니다.')
+      return { success: true as const, versionId: selectedPublishVersionId || null }
+    }
 
     setSaveStatus('saving')
     try {
       const now = new Date().toISOString()
-      const resolvedSaveMode =
-        saveMode ?? (selectedPost.published ? 'draft_update' : 'direct')
       const response = await fetch(`/api/posts/${selectedPostId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: selectedPost.title,
-          content_markdown: toContentString(selectedPost.content_markdown),
-          published: selectedPost.published,
-          save_mode: resolvedSaveMode,
+          title: currentTitle,
+          content_markdown: currentContent,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(await readApiError(response))
+      }
+      const payload = (await response.json()) as {
+        version?: {
+          id: string
+          version_number: number
+          title: string
+          content_markdown: string
+          created_at: string
+        } | null
+        warning?: string
+      }
+
+      setSaveStatus('saved')
+      setIsDraftDirty(false)
+      hasLocalDraftChangesRef.current = false
+      setLastSavedAt(now)
+      setSavedSnapshot(
+        selectedPostId,
+        currentTitle,
+        currentContent,
+      )
+      setDraftTitle(currentTitle)
+      setPosts((current) =>
+        current.map((post) => {
+          if (post.id !== selectedPostId) return post
+          const nextVersions = post.versions ?? []
+          const returnedVersion = payload.version
+          const mergedVersions = returnedVersion
+            ? [
+              {
+                id: returnedVersion.id,
+                version_number: returnedVersion.version_number,
+                title: returnedVersion.title,
+                content_markdown: returnedVersion.content_markdown,
+                created_at: returnedVersion.created_at,
+              },
+              ...nextVersions.filter((version) => version.id !== returnedVersion.id),
+            ].sort((a, b) => b.version_number - a.version_number)
+            : nextVersions
+
+          return {
+            ...post,
+            title: currentTitle,
+            content_markdown: currentContent,
+            updated_at: now,
+            versions: mergedVersions,
+          }
+        }),
+      )
+      if (payload.version?.id) {
+        setSelectedPublishVersionId(payload.version.id)
+      }
+      if (switchToPreview) {
+        setMode('preview')
+      }
+      if (payload.warning) {
+        toast.warning(payload.warning)
+      }
+      if (!silent) toast.success('Draft를 저장했습니다.')
+      return { success: true as const, versionId: payload.version?.id ?? null }
+    } catch (error) {
+      setSaveStatus('error')
+      const message = error instanceof Error ? error.message : '저장에 실패했습니다.'
+      toast.error(message)
+      return { success: false as const, versionId: null as string | null }
+    }
+  }, [selectedPost, selectedPostId, selectedPublishVersionId, selectedSnapshot, setSavedSnapshot])
+
+  const handlePublishVersion = async (versionId: string) => {
+    if (!selectedPostId || !selectedPost) return
+    let publishVersionId = versionId
+    if (saveStatus === 'idle') {
+      const saveResult = await handleSavePost({ switchToPreview: false, silent: true })
+      if (!saveResult.success) return
+      if (saveResult.versionId) {
+        publishVersionId = saveResult.versionId
+      }
+    }
+
+    setIsPublishingVersionId(publishVersionId)
+    try {
+      const response = await fetch(`/api/posts/${selectedPostId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'publish_version',
+          ...(publishVersionId ? { version_id: publishVersionId } : {}),
         }),
       })
 
@@ -320,76 +512,6 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
         throw new Error(await readApiError(response))
       }
 
-      setSaveStatus('saved')
-      setLastSavedAt(now)
-      setLastDraftSavedAt(null)
-      window.localStorage.removeItem(`${DRAFT_STORAGE_PREFIX}${selectedPostId}`)
-      if (selectedPost.published && resolvedSaveMode === 'draft_update') {
-        setPosts((current) =>
-          current.map((post) =>
-            post.id === selectedPostId
-              ? {
-                ...post,
-                has_pending_changes: true,
-                pending_title: post.title,
-                pending_content_markdown: post.content_markdown ?? '',
-                pending_updated_at: now,
-                updated_at: now,
-              }
-              : post,
-          ),
-        )
-      } else {
-        setPosts((current) =>
-          current.map((post) =>
-            post.id === selectedPostId
-              ? {
-                ...post,
-                live_title: post.title,
-                live_content_markdown: post.content_markdown ?? '',
-                has_pending_changes: false,
-                pending_title: null,
-                pending_content_markdown: null,
-                pending_updated_at: null,
-                updated_at: now,
-              }
-              : post,
-          ),
-        )
-      }
-      if (switchToPreview) {
-        setMode('preview')
-      }
-      if (!silent) {
-        if (selectedPost.published && resolvedSaveMode === 'draft_update') {
-          toast.success('수정안을 Draft Update로 저장했습니다.')
-        } else {
-          toast.success('포스트를 저장했습니다.')
-        }
-      }
-      return true
-    } catch (error) {
-      setSaveStatus('error')
-      const message = error instanceof Error ? error.message : '저장에 실패했습니다.'
-      toast.error(message)
-      return false
-    }
-  }, [DRAFT_STORAGE_PREFIX, selectedPost, selectedPostId])
-
-  const handlePublishPendingUpdate = async () => {
-    if (!selectedPostId) return
-    setIsPublishingPending(true)
-    try {
-      const response = await fetch(`/api/posts/${selectedPostId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'publish_pending' }),
-      })
-
-      if (!response.ok) {
-        throw new Error(await readApiError(response))
-      }
-
       const refreshed = await fetch(`/api/posts/${selectedPostId}`)
       if (!refreshed.ok) {
         throw new Error('refresh failed')
@@ -405,70 +527,23 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
               content_markdown: loadedPost.content_markdown ?? post.content_markdown ?? '',
               live_title: loadedPost.live_title ?? loadedPost.title ?? post.title,
               live_content_markdown: loadedPost.live_content_markdown ?? loadedPost.content_markdown ?? post.content_markdown ?? '',
-              has_pending_changes: false,
-              pending_title: null,
-              pending_content_markdown: null,
-              pending_updated_at: null,
+              published_version_id: loadedPost.published_version_id ?? post.published_version_id ?? null,
+              versions: Array.isArray(loadedPost.versions) ? loadedPost.versions as PostVersion[] : (post.versions ?? []),
+              published: loadedPost.published ?? true,
+              published_at: loadedPost.published_at ?? new Date().toISOString(),
               updated_at: loadedPost.updated_at ?? new Date().toISOString(),
             }
             : post,
         ),
       )
       setSaveStatus('saved')
-      toast.success('Pending update를 반영했습니다.')
+      setSelectedPublishVersionId(loadedPost.published_version_id ?? publishVersionId)
+      toast.success('선택한 버전을 배포했습니다.')
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Pending update 반영에 실패했습니다.'
+      const message = error instanceof Error ? error.message : '버전 배포에 실패했습니다.'
       toast.error(message)
     } finally {
-      setIsPublishingPending(false)
-    }
-  }
-
-  const handleDiscardPendingUpdate = async () => {
-    if (!selectedPostId) return
-    setIsDiscardingPending(true)
-    try {
-      const response = await fetch(`/api/posts/${selectedPostId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'discard_pending' }),
-      })
-
-      if (!response.ok) {
-        throw new Error(await readApiError(response))
-      }
-
-      const refreshed = await fetch(`/api/posts/${selectedPostId}`)
-      if (!refreshed.ok) {
-        throw new Error('refresh failed')
-      }
-      const loadedPost = (await refreshed.json()) as Partial<StudioPost>
-
-      setPosts((current) =>
-        current.map((post) =>
-          post.id === selectedPostId
-            ? {
-              ...post,
-              title: loadedPost.title ?? post.title,
-              content_markdown: loadedPost.content_markdown ?? post.content_markdown ?? '',
-              live_title: loadedPost.live_title ?? loadedPost.title ?? post.title,
-              live_content_markdown: loadedPost.live_content_markdown ?? loadedPost.content_markdown ?? post.content_markdown ?? '',
-              has_pending_changes: false,
-              pending_title: null,
-              pending_content_markdown: null,
-              pending_updated_at: null,
-              updated_at: loadedPost.updated_at ?? new Date().toISOString(),
-            }
-            : post,
-        ),
-      )
-      setSaveStatus('saved')
-      toast.success('Pending update를 폐기했습니다.')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Pending update 폐기에 실패했습니다.'
-      toast.error(message)
-    } finally {
-      setIsDiscardingPending(false)
+      setIsPublishingVersionId(null)
     }
   }
 
@@ -481,83 +556,58 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
     }
 
     if (saveStatus === 'idle') {
-      const saved = await handleSavePost({ switchToPreview: false, silent: true })
-      if (!saved) {
-        toast.error('현재 포스트 저장에 실패하여 이동을 취소했습니다.')
+      const shouldDiscard = window.confirm('저장되지 않은 변경사항이 있습니다. 저장하지 않고 이동하시겠습니까?')
+      if (!shouldDiscard) {
         return
       }
+      if (selectedPostId && selectedSnapshot) {
+        latestDraftTitleRef.current = selectedSnapshot.title
+        latestDraftContentRef.current = selectedSnapshot.content
+        setDraftTitle(selectedSnapshot.title)
+      }
+      setSaveStatus('saved')
+      setIsDraftDirty(false)
     }
 
     setSelectedPostId(nextPostId)
     setMode('preview')
     setIsCommandOpen(false)
     setCommandQuery('')
-  }, [handleSavePost, saveStatus, selectedPostId])
+  }, [saveStatus, selectedPostId, selectedSnapshot])
 
   const handleTitleChange = (value: string) => {
     if (!selectedPostId) return
-    const now = new Date().toISOString()
-    setSaveStatus('idle')
-
-    setPosts((current) =>
-      current.map((post) => {
-        if (post.id !== selectedPostId) return post
-        return { ...post, title: value, updated_at: now }
-      }),
+    if (saveStatus !== 'idle') setSaveStatus('idle')
+    setDraftTitle(value)
+    latestDraftTitleRef.current = value
+    hasLocalDraftChangesRef.current = true
+    const snapshot = savedSnapshots[selectedPostId]
+    if (!snapshot) {
+      setIsDraftDirty(true)
+      return
+    }
+    const isDirty = (
+      value !== snapshot.title
+      || latestDraftContentRef.current !== snapshot.content
     )
+    setIsDraftDirty(isDirty)
   }
 
   const handleContentChange = (nextContentMarkdown: string) => {
     if (!selectedPostId) return
-    const now = new Date().toISOString()
-    setSaveStatus('idle')
-
-    setPosts((current) =>
-      current.map((post) => {
-        if (post.id !== selectedPostId) return post
-        return { ...post, content_markdown: nextContentMarkdown, updated_at: now }
-      }),
-    )
-  }
-
-  const handlePublish = async () => {
-    if (!selectedPost || selectedPost.published) return
-    setIsPublishing(true)
-    try {
-      const publishedAt = new Date().toISOString()
-      const response = await fetch(`/api/posts/${selectedPost.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: selectedPost.title,
-          content_markdown: selectedPost.content_markdown ?? '',
-          published: true,
-          published_at: publishedAt,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error(await readApiError(response))
-      }
-
-      setPosts((current) =>
-        current.map((post) =>
-          post.id === selectedPost.id
-            ? { ...post, published: true, published_at: publishedAt, updated_at: publishedAt }
-            : post,
-        ),
-      )
-      setSaveStatus('saved')
-      setLastSavedAt(publishedAt)
-      setLastDraftSavedAt(null)
-      window.localStorage.removeItem(`${DRAFT_STORAGE_PREFIX}${selectedPost.id}`)
-      toast.success('포스트를 발행했습니다.')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : '발행에 실패했습니다.'
-      toast.error(message)
-    } finally {
-      setIsPublishing(false)
+    if (saveStatus !== 'idle') setSaveStatus('idle')
+    latestDraftContentRef.current = nextContentMarkdown
+    hasLocalDraftChangesRef.current = true
+    const snapshot = savedSnapshots[selectedPostId]
+    if (!snapshot) {
+      setIsDraftDirty(true)
+      return
     }
+    const isDirty = (
+      latestDraftTitleRef.current !== snapshot.title
+      || nextContentMarkdown !== snapshot.content
+    )
+    setIsDraftDirty(isDirty)
   }
 
   const handleUnpublish = async () => {
@@ -581,7 +631,7 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
       setPosts((current) =>
         current.map((post) =>
           post.id === selectedPostId
-            ? { ...post, published: false, published_at: null, updated_at: now }
+            ? { ...post, published: false, published_at: null, published_version_id: null, updated_at: now }
             : post,
         ),
       )
@@ -596,12 +646,17 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
     }
   }
 
-  const handleDeleteDraftPost = async () => {
-    if (!selectedPostId || !selectedPost || selectedPost.published) return
-    const shouldDelete = window.confirm('Draft 포스트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')
+  const handleDeletePost = async () => {
+    if (!selectedPostId || !selectedPost) return
+    if (selectedPost.published) {
+      window.alert('게시 중인 포스트는 먼저 게시 해제 후 삭제할 수 있습니다.')
+      return
+    }
+
+    const shouldDelete = window.confirm('이 포스트를 삭제하시겠습니까? 삭제 후 복구할 수 없습니다.')
     if (!shouldDelete) return
 
-    setIsDeletingDraft(true)
+    setIsDeletingPost(true)
     try {
       const response = await fetch(`/api/posts/${selectedPostId}`, {
         method: 'DELETE',
@@ -611,51 +666,31 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
         throw new Error(await readApiError(response))
       }
 
-      const removedPostId = selectedPostId
-      let nextSelectedId: string | null = null
-      setPosts((current) => {
-        const nextPosts = current.filter((post) => post.id !== removedPostId)
-        nextSelectedId = nextPosts[0]?.id ?? null
-        return nextPosts
-      })
-      setSelectedPostId(nextSelectedId)
-      setSaveStatus('saved')
-      setLastSavedAt(null)
-      setLastDraftSavedAt(null)
-      window.localStorage.removeItem(`${DRAFT_STORAGE_PREFIX}${removedPostId}`)
-      toast.success('Draft 포스트를 삭제했습니다.')
+      toast.success('포스트를 삭제했습니다.')
+      router.push('/dashboard')
     } catch (error) {
-      const message = error instanceof Error ? error.message : '포스트 삭제에 실패했습니다.'
+      const message = error instanceof Error ? error.message : '삭제에 실패했습니다.'
       toast.error(message)
     } finally {
-      setIsDeletingDraft(false)
+      setIsDeletingPost(false)
     }
   }
 
-  useEffect(() => {
-    if (mode !== 'edit') return
-    if (!selectedPostId || !selectedPost) return
 
-    const timer = window.setTimeout(() => {
-      if (saveStatus !== 'idle') return
-      saveDraftToLocal(
-        selectedPostId,
-        selectedPost.title,
-        toContentString(selectedPost.content_markdown),
-        selectedPost.published,
-      )
-    }, 1200)
-
-    return () => {
-      window.clearTimeout(timer)
+  const handleCopyMarkdown = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(previewContentMarkdown)
+      toast.success('마크다운을 복사했습니다.')
+    } catch {
+      toast.error('복사에 실패했습니다.')
     }
-  }, [mode, saveStatus, selectedPost, selectedPostId])
+  }, [previewContentMarkdown])
 
   useEffect(() => {
     if (mode !== 'edit') return
     if (!selectedPostId) return
 
-    const handleSaveShortcut = (event: globalThis.KeyboardEvent) => {
+      const handleSaveShortcut = (event: globalThis.KeyboardEvent) => {
       const hasModifier = event.metaKey || event.ctrlKey
       if (!hasModifier) return
 
@@ -663,7 +698,7 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
       if (key !== 's' && key !== 'enter') return
 
       event.preventDefault()
-      if (saveStatus === 'saving' || isContentLoading) return
+      if (saveStatus === 'saving' || isContentLoading || !hasSelectedUnsavedChanges) return
       void handleSavePost()
     }
 
@@ -671,7 +706,7 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
     return () => {
       window.removeEventListener('keydown', handleSaveShortcut)
     }
-  }, [handleSavePost, isContentLoading, mode, saveStatus, selectedPostId])
+  }, [handleSavePost, hasSelectedUnsavedChanges, isContentLoading, mode, saveStatus, selectedPostId])
 
   useEffect(() => {
     const handlePaletteShortcut = (event: globalThis.KeyboardEvent) => {
@@ -736,13 +771,10 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
   const saveStatusLabel = useMemo(() => {
     if (saveStatus === 'saving') return '저장 중'
     if (saveStatus === 'error') return '저장 실패'
-    if (saveStatus === 'idle') {
-      if (lastDraftSavedAt) return `임시 저장됨 (${formatRelativeTime(lastDraftSavedAt)})`
-      return '저장 필요'
-    }
+    if (saveStatus === 'idle') return '저장 필요'
     if (lastSavedAt) return `저장 완료 (${formatRelativeTime(lastSavedAt)})`
     return '변경사항 없음'
-  }, [lastDraftSavedAt, lastSavedAt, saveStatus])
+  }, [lastSavedAt, saveStatus])
 
   return (
     <main id="main-content" className="container-shell py-8">
@@ -772,70 +804,171 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className="inline-flex h-9 items-center rounded-md border border-border px-3 text-sm text-muted-foreground"
-                    aria-live="polite"
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-3 text-xs"
+                    onClick={() => {
+                      if (!confirmDiscardIfNeeded()) return
+                      router.push('/dashboard')
+                    }}
                   >
-                    {saveStatus === 'saved' ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Check className="h-3.5 w-3.5" /> {saveStatusLabel}
+                    <ArrowLeft className="h-4 w-4" />
+                    Dashboard
+                  </Button>
+                  {mode === 'preview' && selectedPost ? (
+                    <>
+                      <DropdownMenu.Root open={isPublishVersionMenuOpen} onOpenChange={setIsPublishVersionMenuOpen}>
+                        <DropdownMenu.Trigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3 text-xs"
+                            disabled={selectedVersions.length === 0}
+                            aria-label="게시할 버전 선택"
+                          >
+                            {selectedPublishVersion
+                              ? `v${selectedPublishVersion.version_number} · ${formatRelativeTime(selectedPublishVersion.created_at)}`
+                              : '최신 Draft 게시'}
+                            <ChevronDown className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Portal>
+                          <DropdownMenu.Content
+                            sideOffset={6}
+                            align="end"
+                            className="z-[95] min-w-[220px] rounded-md border border-border bg-card p-1 shadow-xl"
+                          >
+                            {selectedVersions.map((version) => {
+                              const isSelected = version.id === selectedPublishVersionId
+                              return (
+                                <DropdownMenu.Item
+                                  key={version.id}
+                                  onSelect={() => setSelectedPublishVersionId(version.id)}
+                                  className="flex cursor-pointer items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-muted focus:bg-muted"
+                                >
+                                  <span>
+                                    v{version.version_number} · {formatRelativeTime(version.created_at)}
+                                    {selectedPost.published && selectedPost.published_version_id === version.id ? ' · 공개중' : ''}
+                                  </span>
+                                  {isSelected ? <Check className="h-4 w-4 text-primary" /> : null}
+                                </DropdownMenu.Item>
+                              )
+                            })}
+                          </DropdownMenu.Content>
+                        </DropdownMenu.Portal>
+                      </DropdownMenu.Root>
+                      <Button
+                        size="sm"
+                        className="h-8 px-3 text-xs"
+                        onClick={() => void handlePublishVersion(selectedPublishVersionId)}
+                        disabled={isPublishingVersionId === selectedPublishVersionId}
+                      >
+                        {isPublishingVersionId === selectedPublishVersionId
+                          ? <Loader2 className="h-4 w-4 animate-spin" />
+                          : '게시'}
+                      </Button>
+                      {selectedPost.published ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-3 text-xs"
+                          onClick={() => void handleUnpublish()}
+                          disabled={isUnpublishing}
+                        >
+                          {isUnpublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <EyeOff className="h-4 w-4" />}
+                          게시 해제
+                        </Button>
+                      ) : null}
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="h-8 px-3 text-xs"
+                        onClick={() => void handleDeletePost()}
+                        disabled={isDeletingPost}
+                      >
+                        {isDeletingPost ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                        삭제
+                      </Button>
+                      {workspace && selectedPost.published ? (
+                        <Link href={`/blog/${workspace.slug}/${selectedPost.slug}`} target="_blank">
+                          <Button variant="outline" size="sm" className="h-8 px-3 text-xs">
+                            Public View
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      ) : null}
+                    </>
+                  ) : null}
+                  {mode === 'edit' ? (
+                    <>
+                      <span
+                        className="inline-flex h-8 items-center rounded-md border border-border px-3 text-xs text-muted-foreground"
+                        aria-live="polite"
+                      >
+                        {saveStatus === 'saved' ? (
+                          <span className="inline-flex items-center gap-1">
+                            <Check className="h-3.5 w-3.5" /> {saveStatusLabel}
+                          </span>
+                        ) : (
+                          saveStatusLabel
+                        )}
                       </span>
-                    ) : (
-                      saveStatusLabel
-                    )}
-                  </span>
 
-                  <div className="relative" ref={shortcutPopoverRef}>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setIsShortcutHelpOpen((current) => !current)}
-                      aria-expanded={isShortcutHelpOpen}
-                      aria-haspopup="dialog"
-                    >
-                      <Keyboard className="h-4 w-4" />
-                      Shortcuts
-                    </Button>
-                    {isShortcutHelpOpen ? (
-                      <div className="absolute right-0 top-10 z-[80] w-80 rounded-xl border border-border bg-card p-3 shadow-xl">
-                        <p className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground">KEYBOARD SHORTCUTS</p>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center justify-between gap-3">
-                            <span>Quick open posts</span>
-                            <span className="inline-flex items-center gap-1">
-                              <Kbd>{isMacLike ? 'Cmd' : 'Ctrl'}</Kbd>
-                              <Kbd>K</Kbd>
-                            </span>
+                      <div className="relative" ref={shortcutPopoverRef}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-3 text-xs"
+                          onClick={() => setIsShortcutHelpOpen((current) => !current)}
+                          aria-expanded={isShortcutHelpOpen}
+                          aria-haspopup="dialog"
+                        >
+                          <Keyboard className="h-4 w-4" />
+                          Shortcuts
+                        </Button>
+                        {isShortcutHelpOpen ? (
+                          <div className="absolute right-0 top-10 z-[80] w-80 rounded-xl border border-border bg-card p-3 shadow-xl">
+                            <p className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground">KEYBOARD SHORTCUTS</p>
+                            <div className="space-y-2 text-sm">
+                              <div className="flex items-center justify-between gap-3">
+                                <span>Quick open posts</span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Kbd>{isMacLike ? 'Cmd' : 'Ctrl'}</Kbd>
+                                  <Kbd>K</Kbd>
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between gap-3">
+                                <span>Save post</span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Kbd>{isMacLike ? 'Cmd' : 'Ctrl'}</Kbd>
+                                  <Kbd>Enter</Kbd>
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between gap-3">
+                                <span>Quick save</span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Kbd>{isMacLike ? 'Cmd' : 'Ctrl'}</Kbd>
+                                  <Kbd>S</Kbd>
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between gap-3">
+                                <span>Paste image</span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Kbd>{isMacLike ? 'Cmd' : 'Ctrl'}</Kbd>
+                                  <Kbd>V</Kbd>
+                                </span>
+                              </div>
+                              <div className="mt-2 border-t border-border pt-2 text-xs text-muted-foreground">
+                                포스트 이동은 단축키 <Kbd className="ml-1">{isMacLike ? 'Cmd' : 'Ctrl'}</Kbd>
+                                <Kbd className="ml-1">K</Kbd> 로 사용합니다.
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center justify-between gap-3">
-                            <span>Save post</span>
-                            <span className="inline-flex items-center gap-1">
-                              <Kbd>{isMacLike ? 'Cmd' : 'Ctrl'}</Kbd>
-                              <Kbd>Enter</Kbd>
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between gap-3">
-                            <span>Quick save</span>
-                            <span className="inline-flex items-center gap-1">
-                              <Kbd>{isMacLike ? 'Cmd' : 'Ctrl'}</Kbd>
-                              <Kbd>S</Kbd>
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between gap-3">
-                            <span>Paste image</span>
-                            <span className="inline-flex items-center gap-1">
-                              <Kbd>{isMacLike ? 'Cmd' : 'Ctrl'}</Kbd>
-                              <Kbd>V</Kbd>
-                            </span>
-                          </div>
-                          <div className="mt-2 border-t border-border pt-2 text-xs text-muted-foreground">
-                            포스트 이동은 단축키 <Kbd className="ml-1">{isMacLike ? 'Cmd' : 'Ctrl'}</Kbd>
-                            <Kbd className="ml-1">K</Kbd> 로 사용합니다.
-                          </div>
-                        </div>
+                        ) : null}
                       </div>
-                    ) : null}
-                  </div>
+                    </>
+                  ) : null}
                 </div>
               </header>
 
@@ -846,38 +979,23 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
                   </label>
                   <Input
                     id="studio-title"
-                    value={selectedPost.title}
+                    value={draftTitle}
                     onChange={(event) => handleTitleChange(event.target.value)}
                     placeholder="Post title…"
                     className="h-12 text-2xl font-semibold"
                   />
                   <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/20 p-2">
                     <div className="px-2 text-xs text-muted-foreground">
-                      {selectedPost.published ? (
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span>편집 모드: 작성에 집중하고 저장하세요. 발행/반영 관리는 뷰에서 진행합니다.</span>
-                          {selectedPost.has_pending_changes ? (
-                            <span className="rounded bg-amber-500/15 px-2 py-0.5 text-amber-300">반영 대기 중인 수정안 있음</span>
-                          ) : null}
-                        </div>
-                      ) : (
-                        <p>편집 모드: 내용 작성 후 저장하세요. 발행/삭제는 뷰에서 진행합니다.</p>
-                      )}
+                      <p>편집 모드: Draft 작성과 저장에 집중하세요. 배포/배포중지는 뷰에서 진행합니다.</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      {selectedPost.published ? (
-                        <Button
-                          size="sm"
-                          onClick={() => void handleSavePost({ saveMode: 'draft_update', switchToPreview: false })}
-                          disabled={saveStatus === 'saving' || isContentLoading}
-                        >
-                          {saveStatus === 'saving' ? <Loader2 className="h-4 w-4 animate-spin" /> : '수정안 저장'}
-                        </Button>
-                      ) : (
-                        <Button size="sm" onClick={() => void handleSavePost()} disabled={saveStatus === 'saving' || isContentLoading}>
-                          {saveStatus === 'saving' ? <Loader2 className="h-4 w-4 animate-spin" /> : '저장'}
-                        </Button>
-                      )}
+                      <Button
+                        size="sm"
+                        onClick={() => void handleSavePost()}
+                        disabled={saveStatus === 'saving' || isContentLoading || !hasSelectedUnsavedChanges}
+                      >
+                        {saveStatus === 'saving' ? <Loader2 className="h-4 w-4 animate-spin" /> : '저장'}
+                      </Button>
                     </div>
                   </div>
 
@@ -910,79 +1028,31 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
                 </div>
               ) : (
                 <article className="space-y-6 p-4 md:p-8">
-                  <div className="space-y-4 border-b border-border pb-5">
-                    <div className="space-y-2">
-                      <h2 className="text-3xl font-bold tracking-tight">
-                        {selectedPost.title || 'Untitled'}
-                      </h2>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedPost.published && selectedPost.published_at
-                          ? `Published ${formatRelativeTime(selectedPost.published_at)}`
-                          : '아직 발행되지 않은 Draft입니다.'}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {selectedPost.published ? (
-                        <>
-                          <span className="inline-flex h-8 items-center rounded-md border border-emerald-400/50 bg-emerald-500/15 px-3 text-xs font-medium text-emerald-600 dark:text-emerald-300">
-                            <Check className="mr-1 h-3.5 w-3.5" />
-                            게시됨
-                          </span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => void handleSavePost({ saveMode: 'direct', switchToPreview: false })}
-                            disabled={saveStatus === 'saving' || isContentLoading}
-                          >
-                            {saveStatus === 'saving' ? <Loader2 className="h-4 w-4 animate-spin" /> : '저장 후 즉시 반영'}
-                          </Button>
-                          {selectedPost.has_pending_changes ? (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => void handlePublishPendingUpdate()}
-                                disabled={isPublishingPending}
-                              >
-                                {isPublishingPending ? <Loader2 className="h-4 w-4 animate-spin" /> : '수정안 반영'}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => void handleDiscardPendingUpdate()}
-                                disabled={isDiscardingPending}
-                              >
-                                {isDiscardingPending ? <Loader2 className="h-4 w-4 animate-spin" /> : '수정안 폐기'}
-                              </Button>
-                            </>
-                          ) : null}
-                          <Button size="sm" variant="outline" onClick={() => void handleUnpublish()} disabled={isUnpublishing}>
-                            {isUnpublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <EyeOff className="h-4 w-4" />}
-                            게시 해제
-                          </Button>
-                          {workspace ? (
-                            <Link href={`/blog/${workspace.slug}/${selectedPost.slug}`} target="_blank">
-                              <Button variant="outline" size="sm">
-                                Public View
-                                <ExternalLink className="h-4 w-4" />
-                              </Button>
-                            </Link>
-                          ) : null}
-                        </>
-                      ) : (
-                        <>
-                          <span className="inline-flex h-8 items-center rounded-md border border-border px-3 text-xs font-medium text-muted-foreground">
-                            Draft
-                          </span>
-                          <Button onClick={handlePublish} disabled={isPublishing || isContentLoading} size="sm">
-                            {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : '발행'}
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => void handleDeleteDraftPost()} disabled={isDeletingDraft}>
-                            {isDeletingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                            삭제
-                          </Button>
-                        </>
-                      )}
+                  <div className="space-y-2 border-b border-border pb-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-2">
+                        <h2 className="text-3xl font-bold tracking-tight">
+                          {previewTitle}
+                        </h2>
+                        <div className="space-y-1 text-sm text-muted-foreground">
+                          <p>{previewVersionStatus}</p>
+                          <p>
+                            {selectedPost.published
+                              ? `마지막 게시: ${selectedPost.published_at ? formatRelativeTime(selectedPost.published_at) : '방금'}`
+                              : '현재 비공개 상태'}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 px-3 text-xs"
+                        onClick={() => void handleCopyMarkdown()}
+                        disabled={!previewContentMarkdown}
+                      >
+                        <Copy className="h-4 w-4" />
+                        복사
+                      </Button>
                     </div>
                   </div>
                   {isContentLoading ? (
@@ -1005,7 +1075,7 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
                       </Button>
                     </div>
                   ) : (
-                    <PostViewer contentMarkdown={selectedPost.content_markdown ?? ''} />
+                    <PostViewer contentMarkdown={previewContentMarkdown} />
                   )}
                 </article>
               )}
@@ -1110,7 +1180,7 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
 
             <div className="flex items-center justify-between border-t border-border bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
               <span>↑ ↓ 이동 · Enter 선택 · Esc 닫기</span>
-              <span>이동 전 현재 글을 자동 저장합니다.</span>
+              <span>저장되지 않은 변경사항이 있으면 이동 전에 확인합니다.</span>
             </div>
           </div>
         </div>

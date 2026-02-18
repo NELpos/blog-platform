@@ -5,9 +5,16 @@
   "packageManager": "pnpm@10.29.3",
   "scripts": {
     "dev": "next dev",
+    "dev:rc:on": "REACT_COMPILER=true next dev",
+    "dev:rc:off": "REACT_COMPILER=false next dev",
     "build": "next build",
+    "build:rc:on": "REACT_COMPILER=true next build",
+    "build:rc:off": "REACT_COMPILER=false next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "e2e:install": "pnpm exec playwright install chromium",
+    "e2e:setup": "pnpm exec playwright test tests/e2e/auth.setup.spec.ts --project=chromium --headed",
+    "e2e": "pnpm exec playwright test tests/e2e/studio.spec.ts --project=chromium"
   },
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.16",
@@ -17,6 +24,7 @@
     "@supabase/supabase-js": "^2.95.3",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.564.0",
+    "mermaid": "^11.12.3",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -26,10 +34,12 @@
     "use-debounce": "^10.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20.19.33",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "shadcn": "^3.8.4",

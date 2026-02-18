@@ -112,3 +112,8 @@ body {
 .markdown-renderer iframe {
   border: 0;
 }
+
+.markdown-renderer .mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}

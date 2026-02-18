@@ -71,6 +71,9 @@ export async function POST(request: Request) {
         title,
         slug,
         content_markdown: contentMarkdown,
+        live_title: title,
+        live_content_markdown: contentMarkdown,
+        published_version_id: null,
         published: false,
       })
       .select()
@@ -84,8 +87,40 @@ export async function POST(request: Request) {
       continue
     }
 
-    if (!isMissingColumnError(markdownInsert.error, 'content_markdown')) {
+    const missingMarkdown = isMissingColumnError(markdownInsert.error, 'content_markdown')
+    const missingLiveTitle = isMissingColumnError(markdownInsert.error, 'live_title')
+    const missingLiveContent = isMissingColumnError(markdownInsert.error, 'live_content_markdown')
+    const missingPublishedVersion = isMissingColumnError(markdownInsert.error, 'published_version_id')
+
+    if (!missingMarkdown && !missingLiveTitle && !missingLiveContent && !missingPublishedVersion) {
       return errorResponse(markdownInsert.error)
+    }
+
+    if (!missingMarkdown && (missingLiveTitle || missingLiveContent || missingPublishedVersion)) {
+      const markdownFallback = await supabase
+        .from('posts')
+        .insert({
+          workspace_id: workspace.id,
+          author_id: user.id,
+          title,
+          slug,
+          content_markdown: contentMarkdown,
+          published: false,
+        })
+        .select()
+        .single()
+
+      if (!markdownFallback.error) {
+        return NextResponse.json(markdownFallback.data)
+      }
+
+      if (markdownFallback.error.code === '23505') {
+        continue
+      }
+
+      if (!isMissingColumnError(markdownFallback.error, 'content_markdown')) {
+        return errorResponse(markdownFallback.error)
+      }
     }
 
     let legacyInsert = await supabase

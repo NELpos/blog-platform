@@ -1,5 +1,8 @@
+'use client'
+
 import type { ElementType, ReactNode } from 'react'
 import CodeBlockCard from '@/components/blog/CodeBlockCard'
+import MermaidDiagramCard from '@/components/blog/MermaidDiagramCard'
 import { parseShortcodeLine } from '@/lib/markdown/shortcodes'
 
 type MarkdownRendererProps = {
@@ -208,12 +211,21 @@ function renderMarkdown(content: string): ReactNode[] {
       if (i < lines.length && lines[i].startsWith('```')) i += 1
 
       blocks.push(
-        <CodeBlockCard
-          key={`code-${i}`}
-          language={language}
-          title={title}
-          code={codeLines.join('\n')}
-        />,
+        language.toLowerCase() === 'mermaid'
+          ? (
+            <MermaidDiagramCard
+              key={`mermaid-${i}`}
+              code={codeLines.join('\n')}
+            />
+          )
+          : (
+            <CodeBlockCard
+              key={`code-${i}`}
+              language={language}
+              title={title}
+              code={codeLines.join('\n')}
+            />
+          ),
       )
       continue
     }

@@ -50,3 +50,22 @@ Use **feature slices** as the unit of parallel work:
 - `done`
 
 For `blocked`, include cause and unblock condition.
+
+## E2E Protocol (Local-first)
+Use Playwright with storage-state auth to avoid product-level auth bypasses.
+
+1. `pnpm e2e:install`
+2. `pnpm e2e:setup`
+- runs headed browser
+- complete Google OAuth once
+- writes `playwright/.auth/user.json`
+3. `pnpm e2e`
+- runs studio regression suite with saved auth state
+
+If auth expires, rerun `pnpm e2e:setup`.
+
+Priority regression scope:
+- dashboard -> studio first-load hydration
+- studio save -> preview reflection
+- publish/unpublish and version-selection flow
+- unsaved-change confirmation before post switch

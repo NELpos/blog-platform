@@ -2,7 +2,9 @@
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE workspaces ENABLE ROW LEVEL SECURITY;
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE post_versions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE media ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public_search_events ENABLE ROW LEVEL SECURITY;
 
 -- Profiles RLS Policies
 CREATE POLICY "Users can view their own profile"
@@ -51,6 +53,19 @@ CREATE POLICY "Users can delete their own posts"
   ON posts FOR DELETE
   USING ((select auth.uid()) = author_id);
 
+-- Post Versions RLS Policies
+CREATE POLICY "Users can view their own post versions"
+  ON post_versions FOR SELECT
+  USING ((select auth.uid()) = author_id);
+
+CREATE POLICY "Users can create their own post versions"
+  ON post_versions FOR INSERT
+  WITH CHECK ((select auth.uid()) = author_id);
+
+CREATE POLICY "Users can delete their own post versions"
+  ON post_versions FOR DELETE
+  USING ((select auth.uid()) = author_id);
+
 -- Media RLS Policies
 CREATE POLICY "Users can view their own media"
   ON media FOR SELECT
@@ -63,3 +78,19 @@ CREATE POLICY "Users can upload media"
 CREATE POLICY "Users can delete their own media"
   ON media FOR DELETE
   USING ((select auth.uid()) = user_id);
+
+-- Public search events RLS Policies
+CREATE POLICY "Public can insert search events"
+  ON public_search_events FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Workspace owners can view their search events"
+  ON public_search_events FOR SELECT
+  USING (
+    exists (
+      select 1
+      from workspaces
+      where workspaces.id = public_search_events.workspace_id
+        and workspaces.owner_id = (select auth.uid())
+    )
+  );
