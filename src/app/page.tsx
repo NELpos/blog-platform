@@ -1,18 +1,30 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { createClient } from '@/lib/supabase/server'
+import { GoogleOneTap } from '@/components/auth/GoogleOneTap'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {!user && <GoogleOneTap />}
       <header className="border-b border-border bg-card">
         <div className="container-shell flex h-16 items-center justify-between">
           <Link href="/" className="text-lg font-semibold tracking-tight">Blog Platform</Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Link href="/login">
-              <Button size="sm">로그인</Button>
-            </Link>
+            {user ? (
+              <Link href="/dashboard">
+                <Button size="sm">대시보드</Button>
+              </Link>
+            ) : (
+              <Link href="/login">
+                <Button size="sm">로그인</Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -29,9 +41,15 @@ export default function HomePage() {
               강력한 리치 텍스트 에디터와 깔끔한 퍼블리싱 경험을 하나로 제공합니다.
             </p>
             <div className="mt-10 flex justify-center gap-4">
-              <Link href="/login">
-                <Button size="lg" className="px-8">무료로 시작하기</Button>
-              </Link>
+              {user ? (
+                <Link href="/dashboard">
+                  <Button size="lg" className="px-8">대시보드로 이동</Button>
+                </Link>
+              ) : (
+                <Link href="/login">
+                  <Button size="lg" className="px-8">무료로 시작하기</Button>
+                </Link>
+              )}
               <Link href="#features">
                 <Button variant="outline" size="lg" className="px-8">기능 보기</Button>
               </Link>

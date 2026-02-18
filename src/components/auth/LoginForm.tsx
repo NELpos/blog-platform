@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { GoogleOneTap } from '@/components/auth/GoogleOneTap'
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
@@ -33,6 +34,7 @@ export function LoginForm() {
 
   return (
     <div className="space-y-4">
+      <GoogleOneTap />
       <Button
         onClick={handleGoogleLogin}
         disabled={isLoading}

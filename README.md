@@ -10,8 +10,10 @@ This project separates writing and management flows clearly:
 
 ## Core Features
 - Markdown-first post authoring
+- Mermaid diagram rendering via markdown fence (` ```mermaid `)
 - Studio edit/view workflow with explicit save semantics
-- Draft/published split with pending-update workflow for published posts
+- Manual draft save (no timed autosave) with unsaved-change leave warning
+- Version history is created on publish only (published snapshots)
 - Public post rendering with markdown renderer and shortcode support
 - Keyboard-first productivity (quick open, save shortcuts)
 
@@ -51,6 +53,9 @@ Copy and fill:
 cp .env.local.example .env.local
 ```
 
+Optional:
+- Set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` to enable Google One Tap on `/login`
+
 Supabase setup details:
 - `docs/SUPABASE_SETUP.md`
 
@@ -59,6 +64,9 @@ Supabase setup details:
 - `pnpm lint`: lint checks
 - `pnpm build`: production build
 - `pnpm start`: run built app
+- `pnpm e2e:install`: install Playwright browser
+- `pnpm e2e:setup`: one-time Google OAuth session capture for E2E
+- `pnpm e2e`: run studio E2E scenarios with saved auth state
 
 Recommended verification before PR:
 ```bash
@@ -97,4 +105,4 @@ When DB behavior changes, add migration and update related docs.
 ## Troubleshooting
 - If API returns missing-column errors, verify Supabase migrations are applied
 - If content load/save fails, check `/api/posts/*` route logs and auth session
-- If public view mismatch appears, verify published state and pending update actions
+- If public view mismatch appears, verify selected published version and publish/unpublish state

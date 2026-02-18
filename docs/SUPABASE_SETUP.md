@@ -17,6 +17,7 @@
 1. **Project URL** 복사 → `.env.local`의 `NEXT_PUBLIC_SUPABASE_URL`에 붙여넣기
 2. **anon public** 키 복사 → `.env.local`의 `NEXT_PUBLIC_SUPABASE_ANON_KEY`에 붙여넣기
 3. **service_role** 키 복사 (Show 클릭) → `.env.local`의 `SUPABASE_SERVICE_ROLE_KEY`에 붙여넣기
+4. (선택) Google One Tap 사용 시 Google OAuth Client ID를 `.env.local`의 `NEXT_PUBLIC_GOOGLE_CLIENT_ID`에 설정
 
 ## 3. 데이터베이스 스키마 생성
 
