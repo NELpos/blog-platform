@@ -6,6 +6,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import UserNavMenu from '@/components/auth/UserNavMenu'
 import SettingsSidebarNav from '@/components/settings/SettingsSidebarNav'
 import { getViewerProfile, type SupabaseProfileReader } from '@/lib/auth/viewer'
+import BrandMark from '@/components/brand/BrandMark'
 
 export default async function SettingsLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient()
@@ -24,8 +25,8 @@ export default async function SettingsLayout({ children }: { children: ReactNode
       <header className="border-b border-border bg-card">
         <div className="container-shell flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-lg font-semibold tracking-tight">
-              TechBlog
+            <Link href="/" aria-label="Nelantir Nexus">
+              <BrandMark className="text-lg" />
             </Link>
             <span className="text-muted-foreground">|</span>
             <span className="text-sm text-muted-foreground">Settings</span>

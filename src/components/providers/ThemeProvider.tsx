@@ -12,7 +12,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-const STORAGE_KEY = 'blog-platform-theme'
+const STORAGE_KEY = 'nelantir-nexus-theme'
 
 function applyTheme(theme: Theme) {
   const root = document.documentElement

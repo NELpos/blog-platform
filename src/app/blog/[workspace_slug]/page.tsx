@@ -92,7 +92,7 @@ export default async function BlogParamsPage({
 
       <footer className="mt-20 border-t border-border py-10">
         <div className="container-shell text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} {workspace.name}. Powered by Blog Platform.
+          © {new Date().getFullYear()} {workspace.name}. Powered by Nelantir Nexus.
         </div>
       </footer>
     </div>

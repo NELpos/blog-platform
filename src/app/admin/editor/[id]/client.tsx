@@ -126,7 +126,7 @@ export default function EditorClient({ post }: EditorClientProps) {
 
       <main className="container-shell py-8">
         <section className="mb-6 rounded-xl border border-border bg-card p-6 shadow-sm">
-          <p className="text-sm text-muted-foreground">Tech Blog Editor</p>
+          <p className="text-sm text-muted-foreground">Nelantir Nexus</p>
           <label htmlFor="post-title" className="sr-only">
             Post title
           </label>

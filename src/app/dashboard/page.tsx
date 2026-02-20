@@ -6,6 +6,7 @@ import DashboardPostIndex from '@/components/blog/DashboardPostIndex'
 import { isMissingColumnError } from '@/lib/markdown/legacy'
 import { getViewerProfile, type SupabaseProfileReader } from '@/lib/auth/viewer'
 import UserNavMenu from '@/components/auth/UserNavMenu'
+import BrandMark from '@/components/brand/BrandMark'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -86,8 +87,8 @@ export default async function DashboardPage() {
       <nav className="border-b border-border bg-card backdrop-blur">
         <div className="container-shell flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-lg font-semibold tracking-tight">
-              Blog Platform
+            <Link href="/" aria-label="Nelantir Nexus">
+              <BrandMark className="text-lg" />
             </Link>
             <span className="text-muted-foreground">/</span>
             <span className="text-sm font-medium text-muted-foreground">

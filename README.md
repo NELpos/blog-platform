@@ -1,6 +1,6 @@
-# Blog Platform
+# Nelantir Nexus
 
-Markdown-first tech blog platform built with Next.js App Router + Supabase.
+Nelantir의 Nexus 플랫폼: Next.js App Router + Supabase 기반의 Markdown-first tech blog platform.
 
 ## Project Overview
 This project separates writing and management flows clearly:

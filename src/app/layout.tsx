@@ -4,14 +4,14 @@ import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 
 export const metadata: Metadata = {
-  title: "Blog Platform",
-  description: "Create beautiful blogs with a Notion-like editor",
+  title: 'Nelantir Nexus',
+  description: 'Nelantir Nexus: create and publish technical content in one workflow',
 };
 
 const themeScript = `
   (function() {
     try {
-      const savedTheme = localStorage.getItem('blog-platform-theme');
+      const savedTheme = localStorage.getItem('nelantir-nexus-theme');
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const theme = savedTheme === 'dark' || savedTheme === 'light'
         ? savedTheme

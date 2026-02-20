@@ -27,7 +27,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     <div className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
       <aside className="hidden border-r border-border bg-card lg:flex lg:flex-col">
         <div className="border-b border-border px-5 py-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tech Blog Editor</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Nelantir Nexus</p>
           <h1 className="mt-1 text-lg font-semibold">Admin Panel</h1>
         </div>
         <div className="flex-1 px-3 py-4">

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { GoogleOneTap } from '@/components/auth/GoogleOneTap'
 import UserNavMenu from '@/components/auth/UserNavMenu'
 import { getViewerProfile, type SupabaseProfileReader } from '@/lib/auth/viewer'
+import BrandMark from '@/components/brand/BrandMark'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -18,7 +19,9 @@ export default async function HomePage() {
       {!user && <GoogleOneTap />}
       <header className="border-b border-border bg-card">
         <div className="container-shell flex h-16 items-center justify-between">
-          <Link href="/" className="text-lg font-semibold tracking-tight">Blog Platform</Link>
+          <Link href="/" aria-label="Nelantir Nexus">
+            <BrandMark className="text-lg" />
+          </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
             {user ? (
@@ -43,12 +46,12 @@ export default async function HomePage() {
         <section className="container-shell py-20">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-5xl font-bold tracking-tight md:text-6xl">
-              글쓰기와 발행을
+              Nelantir Nexus에서
               <br />
-              한 번에 관리하는 <span className="text-primary">Tech Blog Editor</span>
+              글쓰기와 발행을 한 번에
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-              강력한 리치 텍스트 에디터와 깔끔한 퍼블리싱 경험을 하나로 제공합니다.
+              Nelantir의 콘텐츠 플랫폼 Nexus는 강력한 편집기와 깔끔한 퍼블리싱 경험을 하나로 제공합니다.
             </p>
             <div className="mt-10 flex justify-center gap-4">
               {user ? (

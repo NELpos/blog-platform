@@ -7,9 +7,10 @@ import { LoginForm } from '@/components/auth/LoginForm'
 import { CredentialLoginForm } from '@/components/auth/CredentialLoginForm'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { ADMIN_SESSION_COOKIE, isAdminSessionTokenValid } from '@/lib/admin/session'
+import BrandMark from '@/components/brand/BrandMark'
 
 export const metadata: Metadata = {
-  title: '로그인 | Blog Platform',
+  title: '로그인 | Nelantir Nexus',
   description: '계정으로 로그인하세요',
 }
 
@@ -50,7 +51,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border bg-card">
         <div className="container-shell flex h-16 items-center justify-between">
-          <Link href="/" className="text-lg font-semibold tracking-tight">Blog Platform</Link>
+          <Link href="/" aria-label="Nelantir Nexus">
+            <BrandMark className="text-lg" />
+          </Link>
           <ThemeToggle />
         </div>
       </header>

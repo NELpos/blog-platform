@@ -197,7 +197,7 @@ export default async function BlogPostPage({
             {workspace.name}
           </Link>
           <p className="text-sm text-muted-foreground">
-             Start your own blog with <Link href="/" className="underline hover:text-foreground">Blog Platform</Link>
+             Start your own blog with <Link href="/" className="underline hover:text-foreground">Nelantir Nexus</Link>
           </p>
         </div>
       </footer>
