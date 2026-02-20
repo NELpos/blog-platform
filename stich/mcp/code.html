@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MCP Settings | Tech Blog Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#067ff9",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .code-block {
+            background-color: #1e293b;
+            color: #f8fafc;
+        }
+        .json-key { color: #7dd3fc; }
+        .json-string { color: #bef264; }
+        .json-number { color: #f472b6; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="flex min-h-screen">
+<!-- Sidebar Navigation -->
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col fixed h-full">
+<div class="p-6 flex items-center gap-3">
+<div class="size-10 rounded-lg bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">terminal</span>
+</div>
+<div>
+<h1 class="font-bold text-sm tracking-tight">Tech Blog Admin</h1>
+<p class="text-xs text-slate-500">Management Portal</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">article</span>
+<span class="text-sm font-medium">Posts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">image</span>
+<span class="text-sm font-medium">Media</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">forum</span>
+<span class="text-sm font-medium">Comments</span>
+</a>
+<div class="pt-4 pb-2 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">System</div>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined font-fill">settings</span>
+<span class="text-sm font-medium">MCP Settings</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2">
+<img class="size-8 rounded-full border border-slate-200" data-alt="Admin user profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEofjweJZc0gAcsTsTlbVFRoaZpFQcQTLL-wPT-yavzW9XM1pv4FEe1LxtXnNCfvzdocX3I8SIBSJLAxhu6OBwFnIyobw-5KCeW2ER0T4qPSPm_heUMVYmUYvGxZ-F6aYqUh_-Pgo0GDWlsq_8j3wYu31hYDpUm8Jcn3gPosR2DjK6nEsIVEQ1hQVpu0ah_hGD1jBMFlX7ugJo8haTEmBy6RqEk-QmbrathKcePCBNuUbxxQ_4z4N3chjWO3pqGIh9IIZUbxxwuk4j"/>
+<div class="flex-1 min-w-0">
+<p class="text-xs font-semibold truncate">Alex Rivers</p>
+<p class="text-[10px] text-slate-500 truncate">System Architect</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-sm">logout</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 flex-1">
+<div class="max-w-5xl mx-auto px-8 py-10">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-2 text-sm text-slate-500 mb-4">
+<a class="hover:text-primary transition-colors" href="#">Admin</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-slate-900 dark:text-slate-100 font-medium">MCP Settings</span>
+</nav>
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-10">
+<div class="space-y-1">
+<h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-slate-100">MCP Settings</h2>
+<p class="text-slate-500 max-w-xl">Configure and manage your Model Context Protocol environment, security keys, and integration parameters.</p>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg font-semibold text-sm flex items-center gap-2 transition-all shadow-sm shadow-primary/20">
+<span class="material-symbols-outlined text-lg">add</span>
+                        Create New API Key
+                    </button>
+</div>
+<!-- API Keys Section -->
+<section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden mb-8 shadow-sm">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800">
+<h3 class="text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">key</span>
+                            MCP API Keys
+                        </h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 uppercase text-[10px] font-bold tracking-widest border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4">Name</th>
+<th class="px-6 py-4">Key Fingerprint</th>
+<th class="px-6 py-4">Created At</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 font-semibold text-sm">Production API</td>
+<td class="px-6 py-4 font-mono text-xs text-slate-500">sk-••••••••7f2b</td>
+<td class="px-6 py-4 text-sm text-slate-500">Oct 12, 2023</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                            Active
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-rose-600 hover:text-rose-700 font-bold text-xs uppercase tracking-wider transition-colors">Revoke</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 font-semibold text-sm">Staging Environment</td>
+<td class="px-6 py-4 font-mono text-xs text-slate-500">sk-••••••••a910</td>
+<td class="px-6 py-4 text-sm text-slate-500">Sep 05, 2023</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                            Active
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-rose-600 hover:text-rose-700 font-bold text-xs uppercase tracking-wider transition-colors">Revoke</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 font-semibold text-sm">Testing Local</td>
+<td class="px-6 py-4 font-mono text-xs text-slate-500">sk-••••••••4db1</td>
+<td class="px-6 py-4 text-sm text-slate-500">Aug 20, 2023</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                                            Expired
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 font-bold text-xs uppercase tracking-wider transition-colors">Delete</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Claude Code / Codex Setup -->
+<section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800">
+<h3 class="text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">terminal</span>
+                                Claude Code / Codex Setup
+                            </h3>
+<p class="text-sm text-slate-500 mt-1">Quickly connect your local environment using this terminal command.</p>
+</div>
+<div class="p-6 bg-slate-50 dark:bg-slate-800/20 flex-1">
+<div class="relative group">
+<div class="code-block p-4 rounded-lg font-mono text-sm overflow-x-auto whitespace-nowrap pr-12 border border-slate-700 shadow-inner">
+<span class="text-primary font-bold">claude-code</span> mcp set <span class="text-yellow-400">https://api.techblog.admin/v1</span> --key <span class="text-emerald-400">sk-pro-••••••••7f2b</span>
+</div>
+<button class="absolute right-2 top-2 p-2 rounded bg-slate-700 hover:bg-slate-600 text-white transition-all shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100" title="Copy to clipboard">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+</div>
+<div class="mt-4 flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-800">
+<span class="material-symbols-outlined text-blue-500 text-sm mt-0.5">info</span>
+<p class="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+                                    Ensure you have the latest version of the Claude Code CLI installed globally via npm before running this command.
+                                </p>
+</div>
+</div>
+</section>
+<!-- MCP Configuration JSON -->
+<section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<div>
+<h3 class="text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">javascript</span>
+                                    MCP Configuration JSON
+                                </h3>
+<p class="text-sm text-slate-500 mt-1">Add this block to your local <code class="bg-slate-100 dark:bg-slate-800 px-1 rounded">mcp-config.json</code>.</p>
+</div>
+<button class="flex items-center gap-2 text-xs font-bold text-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/20 transition-all">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+                                COPY JSON
+                            </button>
+</div>
+<div class="p-0 bg-slate-900 flex-1 min-h-[220px]">
+<pre class="p-6 font-mono text-xs leading-relaxed overflow-auto h-full"><code>{
+  <span class="json-key">"mcpServers"</span>: {
+    <span class="json-key">"tech-blog-manager"</span>: {
+      <span class="json-key">"command"</span>: <span class="json-string">"npx"</span>,
+      <span class="json-key">"args"</span>: [
+        <span class="json-string">"-y"</span>,
+        <span class="json-string">"@techblog/mcp-server"</span>
+      ],
+      <span class="json-key">"env"</span>: {
+        <span class="json-key">"TECHBLOG_API_KEY"</span>: <span class="json-string">"sk-pro-••••••••7f2b"</span>,
+        <span class="json-key">"TECHBLOG_ENDPOINT"</span>: <span class="json-string">"https://api.techblog.admin/v1"</span>
+      },
+      <span class="json-key">"version"</span>: <span class="json-number">1.2</span>
+    }
+  }
+}</code></pre>
+</div>
+</section>
+</div>
+<!-- Help Footer Section -->
+<div class="mt-12 p-8 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent border border-primary/10 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">help</span>
+</div>
+<div>
+<h4 class="font-bold">Need help with MCP?</h4>
+<p class="text-sm text-slate-500">Read our documentation to understand how to leverage the Model Context Protocol effectively.</p>
+</div>
+</div>
+<a class="px-6 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold hover:shadow-md transition-all" href="#">View Documentation</a>
+</div>
+</div>
+</main>
+</div>
+</body></html>

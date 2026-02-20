@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import PostStudio from '@/components/blog/PostStudio'
 import { isMissingColumnError } from '@/lib/markdown/legacy'
+import { getViewerProfile, type SupabaseProfileReader } from '@/lib/auth/viewer'
 
 export default async function StudioPage() {
   const supabase = await createClient()
@@ -70,6 +71,8 @@ export default async function StudioPage() {
     console.error('Failed to load posts for studio', postsError)
   }
 
+  const viewer = await getViewerProfile(supabase as unknown as SupabaseProfileReader, user)
+
   const initialPosts = (posts ?? []).map((post) => ({
     ...post,
     published_version_id: post.published_version_id ?? null,
@@ -78,7 +81,7 @@ export default async function StudioPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <PostStudio workspace={workspace} initialPosts={initialPosts} />
+      <PostStudio workspace={workspace} initialPosts={initialPosts} viewer={viewer} />
     </div>
   )
 }

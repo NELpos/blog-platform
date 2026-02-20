@@ -1,5 +1,18 @@
 # TypeScript 코드 리뷰 가이드
 
+## 목차
+- 개요
+- 1. 타입 안전성 (Type Safety)
+- 2. 제네릭 베스트 프랙티스 (Generics Best Practices)
+- 3. 인터페이스/타입 설계 (Interface & Type Design)
+- 4. 열거형과 상수 (Enums & Constants)
+- 5. 에러 처리 (Error Handling)
+- 6. 모듈 구성 (Module Organization)
+- 7. 통합 체크리스트
+- 리뷰 순서 가이드
+- Before/After 제공 가이드
+
+
 ## 개요
 
 **TypeScript**는 JavaScript에 정적 타입 시스템을 추가하여 코드의 안전성과 유지보수성을 높이는 언어입니다. 그러나 타입 시스템을 올바르게 활용하지 않으면 `any`로 도배된 "타입이 있는 JavaScript"가 되기 쉽습니다. 이 가이드는 TypeScript의 타입 시스템을 최대한 활용하여 안전하고 표현력 있는 코드를 작성하기 위한 코드 리뷰 체크리스트를 제공합니다.

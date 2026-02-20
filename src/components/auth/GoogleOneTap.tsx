@@ -48,7 +48,11 @@ declare global {
 const GSI_SCRIPT_ID = 'google-identity-services'
 const GSI_SCRIPT_SRC = 'https://accounts.google.com/gsi/client'
 const isDev = process.env.NODE_ENV !== 'production'
-const FEDCM_ABORT_LOG_PATTERN = '[GSI_LOGGER]: FedCM get() rejects with AbortError'
+const useFedCmForPrompt = process.env.NEXT_PUBLIC_GOOGLE_ONETAP_USE_FEDCM === 'true'
+const FEDCM_LOG_PATTERNS = [
+  '[GSI_LOGGER]: FedCM get() rejects with AbortError',
+  '[GSI_LOGGER]: FedCM get() rejects with NetworkError',
+]
 
 let scriptLoadPromise: Promise<void> | null = null
 let originalConsoleError: typeof console.error | null = null
@@ -66,7 +70,8 @@ function installFedCmConsoleFilter() {
   if (consoleFilterRefCount === 0) {
     console.error = (...args: unknown[]) => {
       const firstArg = typeof args[0] === 'string' ? args[0] : ''
-      if (firstArg.includes(FEDCM_ABORT_LOG_PATTERN)) {
+      const isFedCmNoise = FEDCM_LOG_PATTERNS.some((pattern) => firstArg.includes(pattern))
+      if (isFedCmNoise) {
         return
       }
       originalConsoleError?.(...args)
@@ -181,7 +186,7 @@ export function GoogleOneTap() {
           cancel_on_tap_outside: true,
           context: 'signin',
           itp_support: true,
-          use_fedcm_for_prompt: true,
+          use_fedcm_for_prompt: useFedCmForPrompt,
         })
 
         window.google.accounts.id.prompt((notification) => {

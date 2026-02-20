@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Kbd } from '@/components/ui/kbd'
 import PostViewer from '@/components/blog/PostViewer'
+import UserNavMenu from '@/components/auth/UserNavMenu'
 
 const MarkdownEditor = dynamic(() => import('@/components/editor/MarkdownEditor'), {
   ssr: false,
@@ -45,6 +46,11 @@ interface PostStudioProps {
     slug: string
   } | null
   initialPosts: StudioPost[]
+  viewer: {
+    displayName: string
+    avatarUrl: string | null
+    email: string | null
+  }
 }
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -89,7 +95,7 @@ function formatRelativeTime(iso: string): string {
   return rtf.format(Math.round(diffMs / (1000 * 60 * 60 * 24 * 365.25)), 'year')
 }
 
-export default function PostStudio({ workspace, initialPosts }: PostStudioProps) {
+export default function PostStudio({ workspace, initialPosts, viewer }: PostStudioProps) {
   const router = useRouter()
   const [posts, setPosts] = useState<StudioPost[]>(initialPosts)
   const [selectedPostId, setSelectedPostId] = useState<string | null>(initialPosts[0]?.id ?? null)
@@ -969,6 +975,8 @@ export default function PostStudio({ workspace, initialPosts }: PostStudioProps)
                       </div>
                     </>
                   ) : null}
+
+                  <UserNavMenu displayName={viewer.displayName} avatarUrl={viewer.avatarUrl} email={viewer.email} />
                 </div>
               </header>
 

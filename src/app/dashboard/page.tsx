@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import DashboardPostIndex from '@/components/blog/DashboardPostIndex'
 import { isMissingColumnError } from '@/lib/markdown/legacy'
+import { getViewerProfile, type SupabaseProfileReader } from '@/lib/auth/viewer'
+import UserNavMenu from '@/components/auth/UserNavMenu'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -73,6 +74,8 @@ export default async function DashboardPage() {
     console.error('Failed to load posts for dashboard', postsError)
   }
 
+  const viewer = await getViewerProfile(supabase as unknown as SupabaseProfileReader, user)
+
   const initialPosts = (posts ?? []).map((post) => ({
     ...post,
     published_version_id: post.published_version_id ?? null,
@@ -94,11 +97,7 @@ export default async function DashboardPage() {
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <form action="/auth/signout" method="post">
-              <Button variant="outline" size="sm">
-                Sign out
-              </Button>
-            </form>
+            <UserNavMenu displayName={viewer.displayName} avatarUrl={viewer.avatarUrl} email={viewer.email} />
           </div>
         </div>
       </nav>

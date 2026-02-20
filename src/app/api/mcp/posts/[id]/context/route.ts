@@ -1,27 +1,39 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { isMissingColumnError, legacyContentToMarkdown } from '@/lib/markdown/legacy'
+import { authenticateMcpRequest, parseBearerToken } from '@/lib/mcp/auth'
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
   const supabase = await createClient()
+  const hasBearerToken = Boolean(parseBearerToken(request))
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let ownerId: string | null = null
+  if (hasBearerToken) {
+    const mcpAuth = await authenticateMcpRequest(request)
+    if (!mcpAuth.ok) {
+      return NextResponse.json({ error: mcpAuth.error }, { status: mcpAuth.status })
+    }
+    ownerId = mcpAuth.actor.userId
+  } else {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    ownerId = user.id
   }
 
   const markdownQuery = await supabase
     .from('posts')
     .select('id, title, content_markdown, updated_at, workspace:workspaces(slug), author_id')
     .eq('id', id)
-    .eq('author_id', user.id)
+    .eq('author_id', ownerId)
     .maybeSingle()
 
   if (!markdownQuery.error && markdownQuery.data) {
@@ -48,7 +60,7 @@ export async function GET(
     .from('posts')
     .select('id, title, content, updated_at, workspace:workspaces(slug), author_id')
     .eq('id', id)
-    .eq('author_id', user.id)
+    .eq('author_id', ownerId)
     .maybeSingle()
 
   if (legacyQuery.error) {

@@ -96,6 +96,7 @@ CREATE TABLE public_search_events (
 CREATE INDEX workspaces_owner_idx ON workspaces(owner_id);
 CREATE INDEX posts_author_idx ON posts(author_id);
 CREATE INDEX posts_author_updated_idx ON posts(author_id, updated_at DESC);
+CREATE INDEX posts_author_slug_idx ON posts(author_id, slug);
 CREATE INDEX posts_workspace_idx ON posts(workspace_id);
 CREATE INDEX posts_published_idx ON posts(workspace_id, published, published_at DESC);
 CREATE INDEX posts_public_feed_idx
@@ -103,6 +104,8 @@ CREATE INDEX posts_public_feed_idx
   WHERE published = true AND published_at IS NOT NULL;
 CREATE INDEX posts_public_search_tsv_idx ON posts USING GIN(search_tsv) WHERE published = true;
 CREATE INDEX posts_public_search_text_trgm_idx ON posts USING GIN(search_text gin_trgm_ops) WHERE published = true;
+CREATE INDEX posts_private_search_tsv_idx ON posts USING GIN(search_tsv);
+CREATE INDEX posts_private_search_text_trgm_idx ON posts USING GIN(search_text gin_trgm_ops);
 CREATE INDEX post_versions_post_created_idx ON post_versions(post_id, created_at DESC);
 CREATE INDEX post_versions_author_created_idx ON post_versions(author_id, created_at DESC);
 CREATE INDEX media_workspace_idx ON media(workspace_id);

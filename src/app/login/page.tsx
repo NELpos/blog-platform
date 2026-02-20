@@ -1,17 +1,45 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { LoginForm } from '@/components/auth/LoginForm'
+import { CredentialLoginForm } from '@/components/auth/CredentialLoginForm'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { ADMIN_SESSION_COOKIE, isAdminSessionTokenValid } from '@/lib/admin/session'
 
 export const metadata: Metadata = {
   title: '로그인 | Blog Platform',
-  description: 'Google 계정으로 로그인하세요',
+  description: '계정으로 로그인하세요',
 }
 
-export default async function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+function readFirstQueryValue(value: string | string[] | undefined) {
+  if (Array.isArray(value)) return value[0] ?? ''
+  return value ?? ''
+}
+
+function getAdminErrorMessage(errorCode: string) {
+  if (errorCode === 'invalid') return '아이디 또는 비밀번호가 올바르지 않습니다.'
+  if (errorCode === 'disabled') return '로그인 설정이 비어 있습니다. 관리자에게 문의하세요.'
+  return ''
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const supabase = await createClient()
+  const cookieStore = await cookies()
+  const adminSession = cookieStore.get(ADMIN_SESSION_COOKIE)?.value
+  const query = await searchParams
+  const adminErrorCode = readFirstQueryValue(query.adminError)
+  const adminErrorMessage = getAdminErrorMessage(adminErrorCode)
+
+  if (isAdminSessionTokenValid(adminSession)) {
+    redirect('/admin')
+  }
+
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
@@ -27,21 +55,25 @@ export default async function LoginPage() {
         </div>
       </header>
 
-      <div className="flex items-center justify-center px-4 py-16">
-        <div className="w-full max-w-md">
-          <div className="mb-8 text-center">
-            <h1 className="mb-2 text-4xl font-bold tracking-tight">로그인</h1>
-            <p className="text-muted-foreground">Google 계정으로 에디터를 바로 시작하세요</p>
+      <div className="container-shell py-14">
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-4xl font-bold tracking-tight">로그인</h1>
+        </div>
+
+        <section className="mx-auto w-full max-w-2xl rounded-xl border border-border bg-card p-8 shadow-sm">
+          <CredentialLoginForm errorMessage={adminErrorMessage} />
+
+          <div className="my-6 h-px w-full bg-border" />
+
+          <div className="mb-3 text-center">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">SSO Login</h3>
           </div>
-
-          <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
           <LoginForm />
-        </div>
+        </section>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            로그인하면 서비스 약관 및 개인정보 처리방침에 동의하는 것으로 간주됩니다.
-          </p>
-        </div>
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          로그인하면 서비스 약관 및 개인정보 처리방침에 동의하는 것으로 간주됩니다.
+        </p>
       </div>
     </div>
   )

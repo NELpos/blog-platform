@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TechBlog Admin - User Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#067ff9",
+                "background-light": "#f5f7f8",
+                "background-dark": "#0f1923",
+              },
+              fontFamily: {
+                "display": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-nav {
+            background-color: #067ff915;
+            color: #067ff9;
+            border-right: 3px solid #067ff9;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined">terminal</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">TechBlog Admin</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Posts</a>
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Analytics</a>
+<a class="text-primary text-sm font-semibold" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<label class="hidden sm:flex flex-col min-w-40 h-9 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-slate-400 flex border-none bg-slate-100 dark:bg-slate-800 items-center justify-center pl-3 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-slate-100 dark:bg-slate-800 focus:ring-0 h-full placeholder:text-slate-400 px-3 rounded-r-lg text-sm" placeholder="Search settings..." value=""/>
+</div>
+</label>
+<button class="flex items-center justify-center rounded-lg h-9 w-9 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<div class="h-9 w-9 rounded-full bg-slate-300 overflow-hidden border border-slate-200 dark:border-slate-700">
+<img class="w-full h-full object-cover" data-alt="User profile thumbnail avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTzgo_pq9qao5zBl9B7BliM7n7WCMDfmSGtwfzCso8wSCBjBoF7iv4dhPJr4x-oJULYrTPu9YASDBYAgiQSuOPiTdmnfkLdKZgAmOMfpAqskA-XW9RoXJ1SH0c6myifz55XZ17jH7j6LgFHD2Udlvn_XNNE9eJUZx4HbGaFeiFUFh9JRZVOmW73cYv3wYrr8dU0abhyq72PEeNKZAz3_H6dVZ1qpu-LKfhy2OZoK7lRDvw84MgVuoBRBF3zzutofszx8-zR8_JQ4dF"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hidden lg:flex flex-col py-6">
+<div class="px-6 mb-4">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Account</h3>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                    General
+                </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-sm font-medium active-nav transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">person</span>
+                    Profile
+                </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">web</span>
+                    Blog Settings
+                </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">palette</span>
+                    Themes
+                </a>
+<div class="px-6 mt-6 mb-4">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Security &amp; Apps</h3>
+</div>
+<a class="flex items-center gap-3 px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+                    Security
+                </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">notifications_active</span>
+                    Notifications
+                </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">apps</span>
+                    Integrations
+                </a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto px-6 py-8 md:px-12 lg:px-16 pb-24">
+<div class="max-w-4xl mx-auto space-y-10">
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+<div>
+<h1 class="text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Settings</h1>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Manage your professional identity and blog configuration.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 text-sm font-semibold border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors">Discard</button>
+<button class="px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors shadow-sm">Save Changes</button>
+</div>
+</div>
+<!-- Profile Section -->
+<section class="space-y-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">account_circle</span>
+<h2 class="text-xl font-bold">Profile Details</h2>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex flex-col md:flex-row gap-8 items-start md:items-center">
+<div class="relative group">
+<div class="size-32 rounded-full overflow-hidden border-4 border-slate-100 dark:border-slate-800 shadow-inner">
+<img class="w-full h-full object-cover" data-alt="High resolution user profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiWjZ1XeB-6_7-TZ4mkwl2lh3-L9hB4wUfkpTdlpcHG1ZBhEx5q2IgXV6xIdiJ1efbP94VY9QbHw1bhZayXEK6CnAU9T75hSIPPVkK8IsEEkQgIcTq0I-0Kj0dM10UZjuLQKkiGWmDPjNf58mAW3PmioeAOHiqsW_HRrHiAS2l3efz58xZRGs7aTDG31oIaYDtgjw0v7sulw_Ue2fMqR8WVbHQChZG94z2IBJBzLEhwWrdsW6c8Ghg7fqfVi-8Wc-KM0_nWq00-Yd_"/>
+</div>
+<button class="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-lg hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[20px]">photo_camera</span>
+</button>
+</div>
+<div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+<div class="flex flex-col gap-1.5">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Display Name</label>
+<input class="form-input rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:border-primary focus:ring-primary/20 transition-all text-sm" type="text" value="Alex River"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Job Title</label>
+<input class="form-input rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:border-primary focus:ring-primary/20 transition-all text-sm" type="text" value="Senior Tech Writer"/>
+</div>
+<div class="flex flex-col gap-1.5 md:col-span-2">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Bio</label>
+<textarea class="form-textarea rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:border-primary focus:ring-primary/20 transition-all text-sm" rows="3">Passionate about cloud architecture and developer experience. Writing about the future of web technologies since 2015.</textarea>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Blog Settings Section -->
+<section class="space-y-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">language</span>
+<h2 class="text-xl font-bold">Blog Configuration</h2>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-1.5">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Blog Title</label>
+<input class="form-input rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:border-primary focus:ring-primary/20 transition-all text-sm" type="text" value="The Modern Stack"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Custom Domain</label>
+<div class="flex rounded-lg shadow-sm">
+<span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-500 text-sm font-medium">https://</span>
+<input class="form-input flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:border-primary focus:ring-primary/20 transition-all text-sm" type="text" value="blog.alexriver.dev"/>
+</div>
+</div>
+<div class="flex flex-col gap-1.5 md:col-span-2">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Blog Description</label>
+<textarea class="form-textarea rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:border-primary focus:ring-primary/20 transition-all text-sm" rows="2">Insights on React, TypeScript, and the evolving ecosystem of modern web development.</textarea>
+</div>
+</div>
+</div>
+</section>
+<!-- Post Settings Section -->
+<section class="space-y-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">edit_note</span>
+<h2 class="text-xl font-bold">Post Defaults</h2>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="space-y-8">
+<div class="flex items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
+<div class="max-w-md">
+<p class="font-semibold text-slate-900 dark:text-slate-100">Default Visibility</p>
+<p class="text-sm text-slate-500">Determine who can see your newly created posts by default.</p>
+</div>
+<select class="form-select rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-medium focus:border-primary focus:ring-primary/20 w-32">
+<option>Public</option>
+<option>Private</option>
+<option>Draft</option>
+</select>
+</div>
+<div class="flex items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
+<div class="max-w-md">
+<p class="font-semibold text-slate-900 dark:text-slate-100">Allow Comments</p>
+<p class="text-sm text-slate-500">Enable or disable discussion threads on your blog posts.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="max-w-md">
+<p class="font-semibold text-slate-900 dark:text-slate-100">Auto-save Interval</p>
+<p class="text-sm text-slate-500">How often should your drafts be saved automatically while writing.</p>
+</div>
+<div class="flex items-center gap-3">
+<input class="form-input w-16 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-center" type="number" value="2"/>
+<span class="text-sm font-medium text-slate-500">minutes</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Blog Themes Section -->
+<section class="space-y-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">format_paint</span>
+<h2 class="text-xl font-bold">Visual Themes</h2>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Theme Card 1 (Active) -->
+<div class="relative group cursor-pointer border-2 border-primary rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition-all">
+<div class="h-24 bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-300 text-4xl">light_mode</span>
+</div>
+<div class="p-3">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Light</span>
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+</div>
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">Default</p>
+</div>
+</div>
+<!-- Theme Card 2 -->
+<div class="relative group cursor-pointer border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition-all">
+<div class="h-24 bg-slate-900 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-600 text-4xl">dark_mode</span>
+</div>
+<div class="p-3">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Dark</span>
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">Onyx Night</p>
+</div>
+</div>
+<!-- Theme Card 3 -->
+<div class="relative group cursor-pointer border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition-all">
+<div class="h-24 bg-white flex flex-col gap-1 items-center justify-center">
+<div class="w-8 h-1 bg-slate-100 rounded-full"></div>
+<div class="w-6 h-1 bg-slate-100 rounded-full"></div>
+</div>
+<div class="p-3">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Clean</span>
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">Minimalist</p>
+</div>
+</div>
+<!-- Theme Card 4 -->
+<div class="relative group cursor-pointer border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition-all">
+<div class="h-24 bg-gradient-to-br from-purple-900 via-pink-900 to-blue-900 flex items-center justify-center">
+<span class="material-symbols-outlined text-pink-400 text-4xl">token</span>
+</div>
+<div class="p-3">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Neon</span>
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">Cyberpunk</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer Actions (Mobile Only/Sticky) -->
+<div class="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+<button class="flex-1 py-3 text-sm font-bold border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300">Discard</button>
+<button class="flex-[2] py-3 text-sm font-bold rounded-lg bg-primary text-white">Save Changes</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

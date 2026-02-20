@@ -38,10 +38,10 @@ export function LoginForm() {
       <Button
         onClick={handleGoogleLogin}
         disabled={isLoading}
-        className="w-full flex items-center justify-center gap-3"
+        className="flex h-11 w-full items-center justify-center gap-3"
         size="lg"
       >
-        <svg className="w-5 h-5" viewBox="0 0 24 24">
+        <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
           <path
             fill="currentColor"
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -61,22 +61,6 @@ export function LoginForm() {
         </svg>
         {isLoading ? '로그인 중...' : 'Google로 계속하기'}
       </Button>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="bg-card px-2 text-muted-foreground">
-            빠르고 안전한 로그인
-          </span>
-        </div>
-      </div>
-
-      <div className="text-center text-sm text-muted-foreground">
-        <p>무료로 시작하세요</p>
-        <p className="mt-1">신용카드 필요 없음</p>
-      </div>
     </div>
   )
 }

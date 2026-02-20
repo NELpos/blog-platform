@@ -3,10 +3,15 @@ import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { createClient } from '@/lib/supabase/server'
 import { GoogleOneTap } from '@/components/auth/GoogleOneTap'
+import UserNavMenu from '@/components/auth/UserNavMenu'
+import { getViewerProfile, type SupabaseProfileReader } from '@/lib/auth/viewer'
 
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const viewer = user
+    ? await getViewerProfile(supabase as unknown as SupabaseProfileReader, user)
+    : null
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -17,9 +22,14 @@ export default async function HomePage() {
           <div className="flex items-center gap-3">
             <ThemeToggle />
             {user ? (
-              <Link href="/dashboard">
-                <Button size="sm">대시보드</Button>
-              </Link>
+              <>
+                <Link href="/dashboard">
+                  <Button size="sm">대시보드</Button>
+                </Link>
+                {viewer ? (
+                  <UserNavMenu displayName={viewer.displayName} avatarUrl={viewer.avatarUrl} email={viewer.email} />
+                ) : null}
+              </>
             ) : (
               <Link href="/login">
                 <Button size="sm">로그인</Button>

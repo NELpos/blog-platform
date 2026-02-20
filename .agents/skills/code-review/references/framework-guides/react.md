@@ -1,5 +1,17 @@
 # React 코드 리뷰 가이드
 
+## 목차
+- 개요
+- 1. 컴포넌트 패턴 (Component Patterns)
+- 2. Hooks 규칙 (Hooks Rules)
+- 3. 상태 관리 (State Management)
+- 4. 렌더링 최적화 (Rendering Optimization)
+- 5. 이벤트 처리 (Event Handling)
+- 6. 접근성 (Accessibility - a11y)
+- 7. 통합 체크리스트
+- Before/After 제공 가이드
+
+
 ## 개요
 
 **React 코드 리뷰 가이드**는 React 19+ 프로젝트에서 Tidy First 원칙과 Modern Software Engineering 원칙을 적용한 체계적인 코드 리뷰를 위한 문서입니다. 컴포넌트 설계, Hooks 활용, 상태 관리, 렌더링 최적화, 이벤트 처리, 접근성까지 6가지 핵심 영역을 다룹니다.

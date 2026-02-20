@@ -1,5 +1,16 @@
 # JavaScript 코드 리뷰 가이드
 
+## 목차
+- 개요
+- 1. 모던 ES 패턴 (Modern ES Patterns)
+- 2. 비동기 처리 (Async Patterns)
+- 3. 모듈 시스템 (Module System)
+- 4. 배열/객체 메서드 (Array & Object Methods)
+- 5. 에러 처리 (Error Handling)
+- 6. 통합 체크리스트
+- Before/After 제공 가이드
+
+
 ## 개요
 
 **JavaScript 코드 리뷰 가이드**는 Tidy First 원칙과 Modern Software Engineering 관점에서 JavaScript 코드를 리뷰할 때 참고하는 언어별 가이드입니다. 모던 ES 패턴, 비동기 처리, 모듈 시스템, 함수형 메서드, 에러 처리의 5가지 영역을 다루며, 각 영역별 체크리스트와 Before/After 예시를 제공합니다.

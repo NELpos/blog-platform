@@ -1,5 +1,16 @@
 # Tidy First 4가지 원칙 체크리스트
 
+## 목차
+- 개요
+- 1. Guard Clauses (조기 반환)
+- 2. Extract Function (함수 추출)
+- 3. High Cohesion (높은 응집도)
+- 4. Low Coupling (낮은 결합도)
+- 통합 체크리스트
+- 우선순위 가이드
+- Before/After 제공 가이드
+
+
 ## 개요
 
 **Tidy First**는 Kent Beck이 제안한 리팩토링 접근법으로, 기능 변경 전에 코드를 먼저 정리하는 것을 강조합니다. 이 문서는 4가지 핵심 원칙을 실제 코드 예시와 함께 설명합니다.

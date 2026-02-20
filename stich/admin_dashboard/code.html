@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User &amp; MCP Key Management Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#067ff9",
+                        "primary-50": "#eff6ff",
+                        "primary-100": "#dbeafe",
+                        "primary-200": "#bfdbfe",
+                        "primary-300": "#93c5fd",
+                        "primary-400": "#60a5fa",
+                        "primary-500": "#067ff9", // Match config
+                        "primary-600": "#2563eb",
+                        "primary-700": "#1d4ed8",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                        "neutral-50": "#f8fafc",
+                        "neutral-100": "#f1f5f9",
+                        "neutral-200": "#e2e8f0",
+                        "neutral-300": "#cbd5e1",
+                        "neutral-400": "#94a3b8",
+                        "neutral-500": "#64748b",
+                        "neutral-600": "#475569",
+                        "neutral-700": "#334155",
+                        "neutral-800": "#1e293b",
+                        "neutral-900": "#0f172a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for table if needed */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-background-light text-neutral-900 font-display min-h-screen flex flex-row overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-72 bg-white border-r border-neutral-200 flex flex-col h-screen shrink-0 hidden lg:flex">
+<!-- Logo / Brand -->
+<div class="p-6 border-b border-neutral-100">
+<div class="flex items-center gap-3">
+<div class="bg-primary-50 text-primary-600 rounded-lg p-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">admin_panel_settings</span>
+</div>
+<div>
+<h1 class="font-bold text-lg text-neutral-900 leading-tight">Admin Nexus</h1>
+<p class="text-neutral-500 text-xs">v2.4.0 • Enterprise</p>
+</div>
+</div>
+</div>
+<!-- Navigation -->
+<nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1">
+<div class="mb-6">
+<p class="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Main</p>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-600 hover:bg-neutral-50 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:text-primary transition-colors">pie_chart</span>
+<span class="text-sm font-medium">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary-50 text-primary border border-primary-100 shadow-sm transition-colors group" href="#">
+<span class="material-symbols-outlined text-[22px] text-primary" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="text-sm font-medium">User Management</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-600 hover:bg-neutral-50 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:text-primary transition-colors">vpn_key</span>
+<span class="text-sm font-medium">MCP Configuration</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-600 hover:bg-neutral-50 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:text-primary transition-colors">receipt_long</span>
+<span class="text-sm font-medium">System Logs</span>
+</a>
+</div>
+<div>
+<p class="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Settings</p>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-600 hover:bg-neutral-50 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:text-primary transition-colors">settings</span>
+<span class="text-sm font-medium">General Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-600 hover:bg-neutral-50 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:text-primary transition-colors">security</span>
+<span class="text-sm font-medium">Security &amp; Access</span>
+</a>
+</div>
+</nav>
+<!-- User Profile (Bottom) -->
+<div class="p-4 border-t border-neutral-200">
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 cursor-pointer transition-colors">
+<div class="h-10 w-10 rounded-full bg-neutral-200 overflow-hidden shrink-0 border border-neutral-200" data-alt="Admin user profile picture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDOqFLdVuJJ_qjrpmJGRt3PdKkBI3QNXrgd-DsLV_oc52aP6XvfgvMSPaz6uTYyVthyUipqg9hzAy76zPW1JjezCwMRgI7DpMzCX1AmS4c89iY9p2Ahbl5zSFdcOHU6o6MrrM_AnOS_TIDPYWDkBZxtqN7lkf0y9bmhgRFU7rUIOryKA06D9ExcgRG3Xema3mjb1lDrG64L4GQwQ-1MFKlTpZF8Dx0i9UGpUCKxDXqo4cfOQFHDpZ4wEkYUf0unuDON-Wu3YLNMXzPR'); background-size: cover; background-position: center;"></div>
+<div class="overflow-hidden">
+<p class="text-sm font-medium text-neutral-900 truncate">Thomas Anderson</p>
+<p class="text-xs text-neutral-500 truncate">Super Admin</p>
+</div>
+<span class="material-symbols-outlined text-neutral-400 ml-auto">more_vert</span>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden bg-background-light">
+<!-- Header -->
+<header class="bg-white border-b border-neutral-200 h-16 flex items-center justify-between px-6 shrink-0 lg:px-8">
+<div class="flex items-center gap-4">
+<button class="lg:hidden p-1 text-neutral-500 hover:text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<nav class="flex text-sm text-neutral-500">
+<a class="hover:text-primary transition-colors" href="#">Dashboard</a>
+<span class="mx-2">/</span>
+<span class="text-neutral-900 font-medium">User Management</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="relative p-2 text-neutral-400 hover:text-primary transition-colors rounded-full hover:bg-neutral-50">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+</button>
+<button class="p-2 text-neutral-400 hover:text-primary transition-colors rounded-full hover:bg-neutral-50">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+<!-- Content Scroll Area -->
+<div class="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar">
+<div class="max-w-7xl mx-auto space-y-6">
+<!-- Page Title & Actions -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<h1 class="text-2xl font-bold text-neutral-900 tracking-tight">User Administration</h1>
+<p class="text-neutral-500 mt-1">Manage system users and their MCP key allocations.</p>
+</div>
+<button class="inline-flex items-center justify-center px-4 py-2.5 bg-primary text-white font-medium text-sm rounded-lg hover:bg-primary-600 transition-colors shadow-sm gap-2">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                        Create New User
+                    </button>
+</div>
+<!-- Stats Cards (Optional Quick View) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm flex items-center justify-between">
+<div>
+<p class="text-neutral-500 text-sm font-medium">Total Users</p>
+<p class="text-2xl font-bold text-neutral-900 mt-1">2,543</p>
+</div>
+<div class="h-10 w-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">group</span>
+</div>
+</div>
+<div class="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm flex items-center justify-between">
+<div>
+<p class="text-neutral-500 text-sm font-medium">Active MCP Keys</p>
+<p class="text-2xl font-bold text-neutral-900 mt-1">1,024</p>
+</div>
+<div class="h-10 w-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">key</span>
+</div>
+</div>
+<div class="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm flex items-center justify-between">
+<div>
+<p class="text-neutral-500 text-sm font-medium">Pending Approvals</p>
+<p class="text-2xl font-bold text-neutral-900 mt-1">12</p>
+</div>
+<div class="h-10 w-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">hourglass_top</span>
+</div>
+</div>
+</div>
+<!-- Filters & Controls Bar -->
+<div class="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm flex flex-col lg:flex-row gap-4 lg:items-center justify-between">
+<!-- Search -->
+<div class="relative w-full lg:max-w-md">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-neutral-400">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-neutral-200 rounded-lg leading-5 bg-neutral-50 placeholder-neutral-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm transition-shadow" placeholder="Search users by name, email, or key ID..." type="text"/>
+</div>
+<!-- Filter Groups -->
+<div class="flex flex-wrap items-center gap-3">
+<div class="relative group">
+<button class="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:ring-2 focus:ring-primary/20">
+<span>Role: All</span>
+<span class="material-symbols-outlined text-neutral-400 text-[18px]">expand_more</span>
+</button>
+</div>
+<div class="relative group">
+<button class="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:ring-2 focus:ring-primary/20">
+<span>Status: Active</span>
+<span class="material-symbols-outlined text-neutral-400 text-[18px]">expand_more</span>
+</button>
+</div>
+<div class="relative group">
+<button class="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:ring-2 focus:ring-primary/20">
+<span class="text-primary font-semibold">Key Count: Any</span>
+<span class="material-symbols-outlined text-primary text-[18px]">expand_more</span>
+</button>
+</div>
+<button class="p-2 text-neutral-500 hover:text-primary border border-neutral-200 rounded-lg hover:bg-neutral-50" title="Refresh Data">
+<span class="material-symbols-outlined text-[20px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- Main Table Card -->
+<div class="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="min-w-full divide-y divide-neutral-200">
+<thead class="bg-neutral-50">
+<tr>
+<th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-10" scope="col">
+<input class="rounded border-neutral-300 text-primary focus:ring-primary cursor-pointer" type="checkbox"/>
+</th>
+<th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider" scope="col">
+                                        User Details
+                                    </th>
+<th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider" scope="col">
+                                        Status
+                                    </th>
+<th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider" scope="col">
+                                        Role
+                                    </th>
+<th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider" scope="col">
+                                        MCP Keys
+                                    </th>
+<th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider" scope="col">
+                                        Last Active
+                                    </th>
+<th class="relative px-6 py-4" scope="col">
+<span class="sr-only">Actions</span>
+</th>
+</tr>
+</thead>
+<tbody class="bg-white divide-y divide-neutral-200">
+<!-- Row 1 -->
+<tr class="hover:bg-neutral-50 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<input class="rounded border-neutral-300 text-primary focus:ring-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100 border border-neutral-200">
+<img alt="Avatar of Jane Cooper" class="h-10 w-10 object-cover" data-alt="Portrait of a smiling woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2iZLm71FkSDPyJ4sZXRWfot18mF-o3eTk1Nz-a05EKOz4ASHZhNljgvD53B2p3wguEofaBPFtLd7KPlUc9Hp3gRSAAzrvdaWd-kOW2kKMSZup3U_6n2PJpxTBlZZZFEzQk06M8QDMcCoZMcwPZLgBEEC7SzuYbB_2WAAQVYGmZGQOGrIsAbFPG6z0ze2FiMX0xlw-x8P1x70xNLa8DdO_KSwlHkDRH84sNzuyhmkRzWoaJQP5xKhPaNfHn4SJQypOlrF1uEMnFPJM"/>
+</div>
+<div class="ml-4">
+<div class="text-sm font-medium text-neutral-900">Jane Cooper</div>
+<div class="text-sm text-neutral-500">jane.cooper@example.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+<span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
+                                            Active
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                                        Administrator
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-bold bg-primary-100 text-primary-700 border border-primary-200 min-w-[32px]">
+                                                5
+                                            </span>
+<button class="text-neutral-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100 p-1" title="Manage Keys">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</div>
+<p class="text-[10px] text-neutral-400 mt-1">Key set: Production A</p>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-green-500">circle</span>
+<span>Just now</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<button class="text-neutral-400 hover:text-neutral-600 rounded-full p-1 hover:bg-neutral-100">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-neutral-50 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<input class="rounded border-neutral-300 text-primary focus:ring-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100 border border-neutral-200">
+<img alt="Avatar of Cody Fisher" class="h-10 w-10 object-cover" data-alt="Portrait of a man with glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAORsnhKZsA5QAaCm_ATZ_2eik4HJi_nPJMQz9PctcC7539oO30B1VTuQzliBicNYG3d07FvMkIsAEqT_IcK1Bf2i35O0Fc3AMG4_dLBtx4UGun5k5asrSJGlDqTZbdWHbV1hd5n4zYlHzhhsoQmHhvdT5tOI_6IVrVT0H7Jin6ors4X_wt6b_GCMynTthq0IJ4U4z13ATckUwEs789OtJeoSnb2fcv_buyKGk8f3bhHTW6DTxMSr3v7Bf7Jm7ftNnS0ca14hIKup0K"/>
+</div>
+<div class="ml-4">
+<div class="text-sm font-medium text-neutral-900">Cody Fisher</div>
+<div class="text-sm text-neutral-500">cody.fisher@example.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600 border border-neutral-200">
+<span class="w-1.5 h-1.5 bg-neutral-400 rounded-full mr-1.5"></span>
+                                            Inactive
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                                        Editor
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-bold bg-neutral-100 text-neutral-500 border border-neutral-200 min-w-[32px]">
+                                                0
+                                            </span>
+<button class="text-neutral-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100 p-1" title="Create Key">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+</button>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                                        2 days ago
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<button class="text-neutral-400 hover:text-neutral-600 rounded-full p-1 hover:bg-neutral-100">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-neutral-50 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<input class="rounded border-neutral-300 text-primary focus:ring-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100 border border-neutral-200">
+<img alt="Avatar of Esther Howard" class="h-10 w-10 object-cover" data-alt="Portrait of a woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANGGTPXEdcrZkDUrPCHLKhFsqByl81OcoDR9Hrm4Uov9TOeH1oMxv9WV-sYH1VNTykp19tvopwKPEQCnbZpogC2AuH8GytUjsUnNtaeGchtBncApCu7npe3zhWXASTHd4sHML4Tq4ISEh9--gAUzp-CtQoyqnsdpWYevIz8V9hT_Tk6PyTmV7P5ruGwspjo7TQtYOu6g5YEN2FabwDSpXyEcOgHi_Xn2cq6I3qrKRxrimT76FiGtgRomHs_zbMMhZ9Z5wndfVhIWfb"/>
+</div>
+<div class="ml-4">
+<div class="text-sm font-medium text-neutral-900">Esther Howard</div>
+<div class="text-sm text-neutral-500">esther.howard@example.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+<span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
+                                            Active
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                                        Developer
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-bold bg-primary-100 text-primary-700 border border-primary-200 min-w-[32px]">
+                                                2
+                                            </span>
+<button class="text-neutral-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100 p-1" title="Manage Keys">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</div>
+<p class="text-[10px] text-neutral-400 mt-1">Key set: Sandbox</p>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                                        5 hours ago
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<button class="text-neutral-400 hover:text-neutral-600 rounded-full p-1 hover:bg-neutral-100">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-neutral-50 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<input class="rounded border-neutral-300 text-primary focus:ring-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100 border border-neutral-200">
+<img alt="Avatar of Cameron Williamson" class="h-10 w-10 object-cover" data-alt="Portrait of a smiling man in a suit" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqHYJFxW7Kfw1fTCTQaYdc4x0kJ0JZslqRUgO3lLSn0n5pyVeshGlUSa_CTn_CH0qn_VMsl-KQvRhWMhJUNvefYH1jXoC_aPU3cbs582RHH5zj8kFOl7mptwOi1zlSoSQh4H0k6R-LiBj_PEDDwpozfgCnkwFkKUR4g2gvdkdWRURPm7rwqm7VrHiRzFdBfPnsRfM7lWXK8gV6ZktnOQ98GwYIEdFYC77T7pg4NK97my_BYuBBTuUNYXXv_7FcNC5v5Q1p0TXJr7Z1"/>
+</div>
+<div class="ml-4">
+<div class="text-sm font-medium text-neutral-900">Cameron Williamson</div>
+<div class="text-sm text-neutral-500">c.williamson@example.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+<span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5"></span>
+                                            Pending
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                                        Viewer
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-bold bg-neutral-100 text-neutral-500 border border-neutral-200 min-w-[32px]">
+                                                0
+                                            </span>
+<button class="text-neutral-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100 p-1" title="Create Key">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+</button>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                                        Never
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<button class="text-neutral-400 hover:text-neutral-600 rounded-full p-1 hover:bg-neutral-100">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-neutral-50 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<input class="rounded border-neutral-300 text-primary focus:ring-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100 border border-neutral-200 flex items-center justify-center">
+<span class="text-neutral-500 font-semibold">LM</span>
+</div>
+<div class="ml-4">
+<div class="text-sm font-medium text-neutral-900">Leslie McKenny</div>
+<div class="text-sm text-neutral-500">leslie.m@example.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+<span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5"></span>
+                                            Suspended
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                                        Developer
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-bold bg-red-50 text-red-600 border border-red-200 min-w-[32px]">
+                                                12
+                                            </span>
+<span class="material-symbols-outlined text-[18px] text-red-400" title="Keys Revoked">block</span>
+</div>
+<p class="text-[10px] text-red-400 mt-1">Pending Revocation</p>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                                        1 week ago
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<button class="text-neutral-400 hover:text-neutral-600 rounded-full p-1 hover:bg-neutral-100">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="bg-white px-4 py-3 flex items-center justify-between border-t border-neutral-200 sm:px-6">
+<div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+<div>
+<p class="text-sm text-neutral-700">
+                                    Showing <span class="font-medium">1</span> to <span class="font-medium">5</span> of <span class="font-medium">97</span> results
+                                </p>
+</div>
+<div>
+<nav aria-label="Pagination" class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+<a class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-neutral-300 bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50" href="#">
+<span class="sr-only">Previous</span>
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</a>
+<a aria-current="page" class="z-10 bg-primary-50 border-primary-500 text-primary-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#">
+                                        1
+                                    </a>
+<a class="bg-white border-neutral-300 text-neutral-500 hover:bg-neutral-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#">
+                                        2
+                                    </a>
+<a class="bg-white border-neutral-300 text-neutral-500 hover:bg-neutral-50 hidden md:inline-flex relative items-center px-4 py-2 border text-sm font-medium" href="#">
+                                        3
+                                    </a>
+<span class="relative inline-flex items-center px-4 py-2 border border-neutral-300 bg-white text-sm font-medium text-neutral-700">
+                                        ...
+                                    </span>
+<a class="bg-white border-neutral-300 text-neutral-500 hover:bg-neutral-50 hidden md:inline-flex relative items-center px-4 py-2 border text-sm font-medium" href="#">
+                                        8
+                                    </a>
+<a class="bg-white border-neutral-300 text-neutral-500 hover:bg-neutral-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#">
+                                        9
+                                    </a>
+<a class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-neutral-300 bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50" href="#">
+<span class="sr-only">Next</span>
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</a>
+</nav>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer / Legal -->
+<div class="flex justify-between items-center pt-4 pb-8 text-neutral-400 text-xs">
+<p>© 2023 Admin Nexus Inc. All rights reserved.</p>
+<div class="flex gap-4">
+<a class="hover:text-neutral-600" href="#">Privacy Policy</a>
+<a class="hover:text-neutral-600" href="#">Terms of Service</a>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

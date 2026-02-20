@@ -1,5 +1,17 @@
 # Next.js 코드 리뷰 가이드
 
+## 목차
+- 개요
+- 1. Server/Client 컴포넌트 (Server & Client Components)
+- 2. 데이터 페칭 (Data Fetching)
+- 3. 라우팅/레이아웃 (Routing & Layouts)
+- 4. 캐싱 전략 (Caching Strategies)
+- 5. Server Actions
+- 6. 성능 최적화 (Performance Optimization)
+- 7. 미들웨어 (Middleware)
+- 8. 통합 체크리스트
+
+
 ## 개요
 
 **Next.js 14+ App Router** 기반 프로젝트의 코드 리뷰를 위한 가이드입니다. Tidy First와 Modern Software Engineering 원칙을 Next.js의 서버/클라이언트 아키텍처에 적용하여, 성능과 유지보수성을 동시에 확보하는 것을 목표로 합니다.
