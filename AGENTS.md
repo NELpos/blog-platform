@@ -1,59 +1,43 @@
 # Repository Guidelines
 
 ## Purpose & Scope
-This document is the agent operating guide for this repository.
+This file defines the top-level operating contract for agents in this repository.
 
-- `AGENTS.md`: task execution rules and reference priority for agents
-- `README.md`: human-facing project overview and onboarding
-
-When references conflict, use this priority:
+Reference priority:
 1. Source code and schema (`src/*`, `supabase/*`)
-2. Operational docs (`AGENTS.md`, `README.md`, `docs/*`)
-3. Historical artifacts (`tasks/*`, `artifacts/*`, `docs/done/*`)
+2. Operational docs (`AGENTS.md`, `README.md`, `docs/agent-layers/*`, `docs/harness/*`)
+3. Historical artifacts (`tasks/*`, `artifacts/*`, `docs/done/*`, `docs/harness/legacy/*`)
 
-## Project Snapshot (Codebase-based)
-- `src/app/dashboard`: post management index (search, bulk actions)
-- `src/app/studio`, `src/app/studio/new`: focused writing and editing studio
-- `src/app/blog/[workspace_slug]/[post_slug]`: public post page
-- `src/app/api/posts/*`: post CRUD, bulk actions, pending update workflow
-- `src/app/api/public/workspaces/[workspace_slug]/*`: public feed and search event endpoints
-- `src/app/login`, `src/components/auth/*`: Google OAuth + Google One Tap entry points
-- `src/components/blog/PostStudio.tsx`: main studio workflow UI
-- `supabase/*`: schema, RLS, triggers, migrations
+## Thin Root Rules
+- Keep this file minimal. Put domain-specific guidance in `docs/agent-layers/*`.
+- Do not add long role-play process descriptions here.
+- If guidance grows, split it into a layer doc and link it.
 
-## Task-first Reference Layers
-Use this map before implementation.
+## Mandatory Feature Workflow
+1. Read `docs/research/text.md` when harness design changes are requested.
+2. Plan first, then implement (unless user explicitly requests plan-only output).
+3. Ask skill choice per feature, convert KR intent to EN execution prompt, and keep outputs in Korean.
+4. Resolve ambiguity before coding; define acceptance criteria/tests before implementation.
+5. Execute independent work in parallel where safe; use retry loop (max 3 cycles) on failures.
+6. For each completed work unit, checkpoint with commit + `docs/changes/*` update + verification results.
+7. Apply AI-Lint doctrine (`docs/ai-lint/*`) for feature code changes.
+8. Run final code review for major changes.
 
-### Post API / Save Workflow
-- Layer 1: `src/app/api/posts/route.ts`, `src/app/api/posts/[id]/route.ts`, `src/app/api/posts/bulk/route.ts`
-- Layer 2: `README.md`, `docs/harness/workflow.md`
-- Layer 3: `tasks/editor-rebuild/*`, `artifacts/*`
-
-### Studio / Editor UX
-- Layer 1: `src/components/blog/PostStudio.tsx`, `src/components/editor/MarkdownEditor.tsx`, `src/components/blog/PostViewer.tsx`
-- Layer 2: `README.md`, `docs/harness/roles/frontend-designer.md`, `docs/harness/roles/ux-engineer.md`
-- Layer 3: `artifacts/stitch/*`, `artifacts/03-editor-ui.md`
-
-### Public Rendering
-- Layer 1: `src/components/blog/MarkdownRenderer.tsx`, `src/lib/markdown/*`, `src/app/blog/[workspace_slug]/[post_slug]/page.tsx`
-- Layer 2: `README.md`
-- Layer 3: `tasks/editor-rebuild/04-renderer-integration.md`, `artifacts/04-renderer-integration.md`
-
-### Public Feed / Search
-- Layer 1: `src/app/api/public/workspaces/[workspace_slug]/posts/route.ts`, `src/app/api/public/workspaces/[workspace_slug]/search-events/route.ts`, `src/lib/public/posts.ts`, `src/components/blog/PublicPostFeed.tsx`, `src/components/blog/PublicPostSearchBar.tsx`
-- Layer 2: `README.md`
-- Layer 3: `supabase/migrations/20260218_public_posts_search_fts.sql`, `supabase/migrations/20260218_public_posts_korean_search_trgm.sql`, `supabase/migrations/20260218_public_search_events.sql`
-
-### Auth / Session
-- Layer 1: `src/components/auth/GoogleOneTap.tsx`, `src/components/auth/LoginForm.tsx`, `src/app/auth/callback/route.ts`, `src/lib/supabase/middleware.ts`
-- Layer 2: `docs/SUPABASE_SETUP.md`, `README.md`
-- Layer 3: `tests/e2e/auth.setup.spec.ts`
-
-### DB / Migration / RLS
-- Layer 1: `supabase/schema.sql`, `supabase/rls.sql`, `supabase/triggers.sql`, `supabase/migrations/*`
-- Layer 2: `docs/SUPABASE_SETUP.md`, `README.md`
-- Layer 3: `tasks/editor-rebuild/01-schema-api.md`, `artifacts/01-schema-api.md`
-
+## Domain Flow Entry Points
+- Founder context: `docs/agent-layers/00-founder-context.md`
+- Core governance: `docs/agent-layers/01-core-governance.md`
+- Feature planning: `docs/agent-layers/02-feature-planning.md`
+- Frontend flow: `docs/agent-layers/03-frontend-flow.md`
+- Backend flow: `docs/agent-layers/04-backend-flow.md`
+- DB flow: `docs/agent-layers/05-db-flow.md`
+- Quality gates: `docs/agent-layers/06-quality-gates.md`
+- Parallel/retry loop: `docs/agent-layers/07-parallel-and-loop.md`
+- Reporting: `docs/agent-layers/08-reporting.md`
+- E2E automation: `docs/agent-layers/09-e2e-automation.md`
+- Final review: `docs/agent-layers/10-final-review.md`
+- AI-Lint doctrine: `docs/ai-lint/*`
+- Project intent: `docs/project-intent.md`
+- Engineering philosophy: `docs/engineering-philosophy.md`
 
 ## Build, Test, and Development Commands
 - `pnpm dev`: start local dev server at `http://localhost:3000`
@@ -69,7 +53,7 @@ Before PR:
 
 ## Coding Style & Naming Conventions
 - Language: TypeScript (`strict`)
-- Components: `PascalCase` filenames (e.g. `PostStudio.tsx`)
+- Components: `PascalCase` filenames
 - Routes: Next.js App Router lowercase segments with dynamic params
 - Utilities: lowercase files under `src/lib`
 - Style: single quotes, no semicolons, 2-space indentation
@@ -85,10 +69,3 @@ Manual checks:
 - dashboard post index (search, bulk actions)
 - studio save/publish/view workflow
 - public blog feed/search and post page rendering
-
-## Commit & PR Guidelines
-- Use clear imperative commit messages
-- Keep PR scope focused
-- Describe behavior changes and affected routes/APIs
-- Add screenshots for UI changes
-- Note any Supabase schema/RLS/env changes

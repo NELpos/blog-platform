@@ -1,6 +1,7 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import Image from 'next/image'
 import Link from 'next/link'
 import { LogOut, UserRound, Wrench } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -32,7 +33,15 @@ export default function UserNavMenu({ displayName, avatarUrl, email, className }
           )}
         >
           {avatarUrl ? (
-            <img src={avatarUrl} alt={displayName} className="size-full object-cover" referrerPolicy="no-referrer" />
+            <Image
+              src={avatarUrl}
+              alt={displayName}
+              width={36}
+              height={36}
+              className="size-full object-cover"
+              unoptimized
+              referrerPolicy="no-referrer"
+            />
           ) : (
             <span aria-hidden>{getInitials(displayName)}</span>
           )}

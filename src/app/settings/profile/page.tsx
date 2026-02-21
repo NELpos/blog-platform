@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { getViewerProfile, type SupabaseProfileReader } from '@/lib/auth/viewer'
 import { Input } from '@/components/ui/input'
@@ -24,13 +25,21 @@ export default async function ProfileSettingsPage() {
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        <div className="inline-flex size-16 items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-sm font-semibold">
-          {viewer.avatarUrl ? (
-            <img src={viewer.avatarUrl} alt={viewer.displayName} className="size-full object-cover" referrerPolicy="no-referrer" />
-          ) : (
-            viewer.displayName.slice(0, 2).toUpperCase()
-          )}
-        </div>
+          <div className="inline-flex size-16 items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-sm font-semibold">
+            {viewer.avatarUrl ? (
+              <Image
+                src={viewer.avatarUrl}
+                alt={viewer.displayName}
+                width={64}
+                height={64}
+                className="size-full object-cover"
+                unoptimized
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              viewer.displayName.slice(0, 2).toUpperCase()
+            )}
+          </div>
         <div>
           <p className="font-medium">{viewer.displayName}</p>
           <p className="text-sm text-muted-foreground">{viewer.email ?? 'No email'}</p>

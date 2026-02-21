@@ -19,15 +19,15 @@ Verify that the harness workflow works end-to-end with one small real feature.
 ## Roles and Deliverables
 1. Frontend Designer Agent
 - Output: `docs/harness/runs/<date>-design-proposal.md`
-- Use template: `docs/harness/templates/design-proposal.template.md`
+- Use template: `docs/harness/legacy/templates/design-proposal.template.md`
 
 2. Beta User Agent
 - Output: `docs/harness/runs/<date>-beta-feedback.md`
-- Use template: `docs/harness/templates/beta-feedback.template.md`
+- Use template: `docs/harness/legacy/templates/beta-feedback.template.md`
 
 3. UX Engineer Agent
 - Output: `docs/harness/runs/<date>-ux-review.md`
-- Use template: `docs/harness/templates/ux-review.template.md`
+- Use template: `docs/harness/legacy/templates/ux-review.template.md`
 
 4. Orchestration Agent (Gate 1)
 - Decision record: `APPROVED` or `REVISE`
@@ -35,7 +35,7 @@ Verify that the harness workflow works end-to-end with one small real feature.
 
 5. Next.js Dev Lead Agent
 - Output: `docs/harness/runs/<date>-execution-plan.md`
-- Use template: `docs/harness/templates/execution-plan.template.md`
+- Use template: `docs/harness/legacy/templates/execution-plan.template.md`
 - Create 2-3 slices:
   - slice A: command list UI
   - slice B: keyboard/interaction handling
@@ -51,7 +51,7 @@ Verify that the harness workflow works end-to-end with one small real feature.
 
 8. Dev Lead Completion Report
 - Output: `docs/done/<date>-studio-command-palette-polish-done.md`
-- Use template: `docs/harness/templates/done-report.template.md`
+- Use template: `docs/harness/legacy/templates/done-report.template.md`
 
 ## Required Checks
 - `pnpm lint`

@@ -1,6 +1,7 @@
 'use client'
 
 import type { ElementType, ReactNode } from 'react'
+import Image from 'next/image'
 import CodeBlockCard from '@/components/blog/CodeBlockCard'
 import MermaidDiagramCard from '@/components/blog/MermaidDiagramCard'
 import { parseShortcodeLine } from '@/lib/markdown/shortcodes'
@@ -134,17 +135,29 @@ function renderShortcode(line: string, key: string): ReactNode {
     const align = shortcode.attrs.align ?? 'center'
     const caption = shortcode.attrs.caption
     const alt = shortcode.attrs.alt ?? caption ?? 'Post image'
+    const imageUrl = safeUrl(shortcode.url)
 
     const justifyClass = align === 'left' ? 'justify-start' : align === 'right' ? 'justify-end' : 'justify-center'
 
+    if (!imageUrl) {
+      return (
+        <p key={key} className="rounded-md border border-border bg-muted/20 p-3 text-sm text-muted-foreground">
+          Unsupported image URL: {shortcode.url}
+        </p>
+      )
+    }
+
     return (
       <figure key={key} className={`my-6 flex flex-col gap-2 ${justifyClass}`}>
-        <img
-          src={shortcode.url}
+        <Image
+          src={imageUrl}
           alt={alt}
+          width={1200}
+          height={800}
           style={{ width, maxWidth: '100%' }}
           className="rounded-lg border border-border bg-muted/20"
           loading="lazy"
+          unoptimized
         />
         {caption ? <figcaption className="text-sm text-muted-foreground">{caption}</figcaption> : null}
       </figure>

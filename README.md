@@ -62,6 +62,10 @@ Supabase setup details:
 ## Development Commands
 - `pnpm dev`: start dev server
 - `pnpm lint`: lint checks
+- `pnpm lint:fix`: lint auto-fix for fixable issues
+- `pnpm lint:ci`: lint gate with zero warnings
+- `pnpm ai-lint:check`: structured AI-Lint diagnostics report
+- `pnpm ai-lint:loop`: AI-Lint loop (autofix pass + blocker diagnostics)
 - `pnpm build`: production build
 - `pnpm start`: run built app
 - `pnpm e2e:install`: install Playwright browser
@@ -89,18 +93,27 @@ When DB behavior changes, add migration and update related docs.
 4. Visit public post page when published
 5. Manage published status/delete from management flow
 
-## Harness Workflow (Team/Agent Process)
-- Process docs: `docs/harness/workflow.md`
-- Role contracts: `docs/harness/roles/*`
-- Output templates: `docs/harness/templates/*`
-- Completion reports: `docs/done/*`
+## Agent Operation
+- Root policy: `AGENTS.md`
+- Layered rules: `docs/agent-layers/*`
+- Founder context: `docs/agent-layers/00-founder-context.md`
+- Project intent: `docs/project-intent.md`
+- Engineering philosophy: `docs/engineering-philosophy.md`
+- AI-Lint doctrine: `docs/ai-lint/*`
+- Harness workflow: `docs/harness/workflow.md`
+- Templates: `docs/harness/templates/*`
+- Change reports: `docs/changes/*`
+- Legacy harness experiment: `docs/harness/legacy/*`
 
 ## Documentation Map
 - Agent execution guide: `AGENTS.md`
 - Product/dev onboarding: `README.md`
+- Product context: `docs/project-intent.md`, `docs/engineering-philosophy.md`
 - Supabase setup: `docs/SUPABASE_SETUP.md`
-- Harness process: `docs/harness/*`
-- Historical task context: `tasks/*`, `artifacts/*`
+- Layered operation docs: `docs/agent-layers/*`
+- Harness workflow and templates: `docs/harness/workflow.md`, `docs/harness/templates/README.md`
+- Platform user onboarding: `docs/platform-onboarding/*`
+- Historical task context: `tasks/*`, `artifacts/*`, `docs/done/*`
 
 ## Troubleshooting
 - If API returns missing-column errors, verify Supabase migrations are applied

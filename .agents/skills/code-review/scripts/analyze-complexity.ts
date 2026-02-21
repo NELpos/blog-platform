@@ -198,13 +198,6 @@ class ComplexityAnalyzer {
   }
 }
 
-function getComplexityRating(complexity: number): string {
-  if (complexity <= 10) return '단순'
-  if (complexity <= 20) return '보통'
-  if (complexity <= 50) return '복잡'
-  return '매우 복잡'
-}
-
 function analyzeFile(filePath: string): FunctionComplexity[] {
   const analyzer = new ComplexityAnalyzer()
   return analyzer.analyze(filePath)

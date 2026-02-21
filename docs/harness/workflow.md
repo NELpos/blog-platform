@@ -1,52 +1,26 @@
-# Harness Workflow
+# Harness Workflow v2
 
 ## Goal
-Run frontend product work with clear role contracts, approval gates, and parallel execution.
+Run feature development with explicit skill selection, layered references, and fixed quality gates.
 
 ## End-to-end Flow
-1. Intake (Orchestration Agent)
-2. Design proposal (Frontend Designer Agent)
-3. Beta feedback (Beta User Agent)
-4. UX review (UX Engineer Agent)
-5. Gate 1: design approval
-6. Execution plan + feature slices (Next.js Dev Lead Agent)
-7. Gate 2: implementation approval
-8. Implementation (Next.js Engineer Agent)
-9. Verification and completion report (`docs/done/*`)
+1. Intake: capture KR request
+2. Skill selection question to user
+3. KR -> EN prompt conversion
+4. Plan in Korean with acceptance criteria (Gate A)
+5. Implement by domain flow immediately after plan approval (unless plan-only explicitly requested)
+6. Quality gate: `pnpm lint:ci`, then tests/build/e2e as needed (Gate B)
+7. Retry loop on failures (max 3), with root-cause-first analysis
+8. Work-unit checkpoint: commit + change report + verification status
+9. Final review for major changes and publish/update `docs/changes/*`
 
-## Approval Gates
-### Gate 1 - Design Direction Approval
-Required inputs:
-- `design-proposal`
-- `beta-feedback`
-- `ux-review`
+## Lint Failure Handling
+- Use `docs/ai-lint/remediation-playbook.md` for root-cause mapping and fix steps.
+- Keep autofix limited to attempt 1, then manual fixes for non-fixable issues.
 
-Pass criteria:
-- Target flow is understandable for first-time users
-- Proposed UI components are implementable in current stack
-- Major UX risks identified and prioritized
-
-### Gate 2 - Implementation Approval
-Required inputs:
-- `execution-plan`
-- feature-slice tasks
-
-Pass criteria:
-- Scope is fixed and non-overlapping
-- Dependencies are explicit
-- Done criteria and checks are defined per slice
-
-## Parallelization Rule
-Use **feature slices** as the unit of parallel work:
-- each slice includes UI + API + data/test impact
-- each slice has one owner
-- common/shared foundation changes are handled first
-
-## Status Model
-- `pending`
-- `in_progress`
-- `blocked`
-- `review`
-- `done`
-
-For `blocked`, include cause and unblock condition.
+## Reference Strategy
+- Thin root policy in `AGENTS.md`
+- Task-specific details in `docs/agent-layers/*`
+- AI-Lint doctrine in `docs/ai-lint/*`
+- Canonical templates in `docs/harness/templates/README.md`
+- Legacy process retained at `docs/harness/legacy/*`

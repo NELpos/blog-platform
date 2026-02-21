@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ClipboardEvent, type KeyboardEvent, type ReactNode, type RefObject } from 'react'
 import { Bold, Code2, Heading1, ImageIcon, Italic, Link as LinkIcon, List, ListOrdered, MoreVertical, Quote, Table2, Video } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -49,6 +50,13 @@ const IMAGE_SIZE_PRESETS = [
   { id: 'm', label: 'M', width: '70%' },
   { id: 'l', label: 'L', width: '100%' },
 ] as const
+
+function isSupportedImagePreviewUrl(url: string) {
+  const trimmed = url.trim()
+  if (!trimmed) return false
+  if (trimmed.startsWith('/')) return true
+  return /^https?:\/\/.+/i.test(trimmed)
+}
 
 function ToolbarButton({ label, onClick, children, disabled, buttonRef }: ToolbarButtonProps) {
   return (
@@ -118,6 +126,7 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
   const imageToolbarButtonRef = useRef<HTMLButtonElement | null>(null)
   const imageUrlInputRef = useRef<HTMLInputElement | null>(null)
   const lastFocusedElementRef = useRef<HTMLElement | null>(null)
+  const imagePreviewUrl = isSupportedImagePreviewUrl(imageDraft.url) ? imageDraft.url.trim() : null
   const onChangeRef = useRef(onChange)
   const valueRef = useRef(value)
   const prevInitialContentRef = useRef(initialContent)
@@ -824,13 +833,16 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
 
               <div className="rounded-xl border border-border bg-background/70 p-3">
                 <p className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground">PREVIEW</p>
-                {imageDraft.url.trim() ? (
+                {imagePreviewUrl ? (
                   <figure className={`flex flex-col gap-2 ${imageDraft.align === 'left' ? 'items-start' : imageDraft.align === 'right' ? 'items-end' : 'items-center'}`}>
-                    <img
-                      src={imageDraft.url}
+                    <Image
+                      src={imagePreviewUrl}
                       alt={imageDraft.alt || 'Preview image'}
+                      width={1200}
+                      height={800}
                       style={{ width: imageDraft.width || '100%', maxWidth: '100%' }}
                       className="max-h-[220px] rounded-lg border border-border object-contain"
+                      unoptimized
                     />
                     {imageDraft.caption ? <figcaption className="text-xs text-muted-foreground">{imageDraft.caption}</figcaption> : null}
                   </figure>
