@@ -36,6 +36,10 @@ function isTableSeparatorLine(line: string): boolean {
   return cells.every((cell) => /^:?-{3,}:?$/.test(cell.replace(/\s+/g, '')))
 }
 
+function isHorizontalRuleLine(line: string): boolean {
+  return /^(?:\s{0,3})([-*_])(?:\s*\1){2,}\s*$/.test(line)
+}
+
 function safeUrl(input: string): string | null {
   try {
     const parsed = new URL(input)
@@ -250,6 +254,12 @@ function renderMarkdown(content: string): ReactNode[] {
       continue
     }
 
+    if (isHorizontalRuleLine(line)) {
+      blocks.push(<hr key={`hr-${i}`} className="my-8 border-0 border-t border-border/80" />)
+      i += 1
+      continue
+    }
+
     if (i + 1 < lines.length && lines[i].includes('|') && isTableSeparatorLine(lines[i + 1])) {
       const header = parseTableRow(lines[i])
       i += 2
@@ -361,6 +371,7 @@ function renderMarkdown(content: string): ReactNode[] {
     i += 1
     while (i < lines.length && lines[i].trim() && !lines[i].startsWith('```')) {
       if (parseShortcodeLine(lines[i])) break
+      if (isHorizontalRuleLine(lines[i])) break
       if (i + 1 < lines.length && lines[i].includes('|') && isTableSeparatorLine(lines[i + 1])) break
       if (lines[i].match(/^(#{1,6})\s+/)) break
       if (lines[i].match(/^>\s?/)) break

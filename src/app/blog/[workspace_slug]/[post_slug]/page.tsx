@@ -145,12 +145,12 @@ export default async function BlogPostPage({
           <div aria-hidden="true" />
           <div className="min-w-0 lg:px-4">
             <section className="rounded-2xl border border-border/80 bg-card/45 px-5 py-7 shadow-sm backdrop-blur-sm md:px-8 md:py-9">
-              <div className="mb-10 border-b border-border/70 pb-8 text-center">
-                <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+              <div className="mb-10 border-b border-border/70 pb-8 text-center md:text-left">
+                <h1 className="mx-auto max-w-[22ch] text-4xl font-bold leading-[1.15] tracking-tight md:mx-0 md:max-w-[28ch] md:text-5xl">
                   {post.title}
                 </h1>
 
-                <div className="mt-6 flex items-center justify-center gap-3 text-sm text-muted-foreground">
+                <div className="mt-6 flex items-center justify-center gap-3 text-sm text-muted-foreground md:justify-start">
                   {authorProfile?.avatar_url && (
                     <Image
                       src={authorProfile.avatar_url}

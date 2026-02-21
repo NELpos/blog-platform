@@ -68,7 +68,7 @@ export default function PostList({ workspaceSlug, posts }: PostListProps) {
           <Link
             key={post.id}
             href={`/blog/${workspaceSlug}/${post.slug}`}
-            className="group flex min-h-[420px] flex-col border-b border-border/80 p-8 transition-colors hover:bg-muted/20 md:[&:nth-child(2n+1)]:border-r lg:border-b-0 lg:border-r lg:[&:nth-child(3n)]:border-r-0"
+            className="group flex min-h-[300px] flex-col border-b border-border/80 p-6 transition-colors hover:bg-muted/20 md:min-h-[340px] md:p-7 md:[&:nth-child(2n+1)]:border-r lg:min-h-[360px] lg:border-b-0 lg:border-r lg:[&:nth-child(3n)]:border-r-0"
           >
             <div className="mb-10 flex items-center justify-between text-sm text-muted-foreground">
               <span className={`inline-flex items-center justify-center rounded-md border px-2.5 py-1 text-xs font-semibold tracking-wide ${categoryBadgeClass(category)}`}>
@@ -87,10 +87,10 @@ export default function PostList({ workspaceSlug, posts }: PostListProps) {
             </div>
 
             <div className="flex flex-1 flex-col space-y-4">
-              <h3 className="text-4xl font-semibold leading-[1.12] tracking-tight text-foreground transition-colors group-hover:text-primary md:text-[42px]">
+              <h3 className="line-clamp-3 text-3xl font-semibold leading-[1.2] tracking-tight text-foreground transition-colors group-hover:text-primary md:text-4xl">
                 {post.title || 'Untitled'}
               </h3>
-              <p className="line-clamp-6 text-xl leading-relaxed text-muted-foreground">
+              <p className="line-clamp-5 text-lg leading-relaxed text-muted-foreground md:text-xl">
                 {buildExcerpt(post)}
               </p>
             </div>

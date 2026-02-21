@@ -109,6 +109,7 @@ When DB behavior changes, add migration and update related docs.
 - Agent execution guide: `AGENTS.md`
 - Product/dev onboarding: `README.md`
 - Product context: `docs/project-intent.md`, `docs/engineering-philosophy.md`
+- Harness retrospective insights: `docs/insights/2026-02-21-harness-engineering-insights.md`
 - Supabase setup: `docs/SUPABASE_SETUP.md`
 - Layered operation docs: `docs/agent-layers/*`
 - Harness workflow and templates: `docs/harness/workflow.md`, `docs/harness/templates/README.md`

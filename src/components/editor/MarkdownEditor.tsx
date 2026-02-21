@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ClipboardEvent, type KeyboardEvent, type ReactNode, type RefObject } from 'react'
-import { Bold, Code2, Heading1, ImageIcon, Italic, Link as LinkIcon, List, ListOrdered, MoreVertical, Quote, Table2, Video } from 'lucide-react'
+import { Bold, Code2, Heading1, ImageIcon, Italic, Link as LinkIcon, List, ListOrdered, Minus, MoreVertical, Quote, Table2, Video } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { uploadImage } from '@/lib/editor/upload'
 import { buildImageShortcode, buildVideoShortcode } from '@/lib/markdown/shortcodes'
@@ -225,6 +225,10 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
     insertBlock('```mermaid\nflowchart TD\n  A[Start] --> B[Done]\n```')
   }
 
+  const insertDivider = () => {
+    insertBlock('---')
+  }
+
   const setLink = () => {
     updateWithSelection((start, end) => {
       const selected = value.slice(start, end) || 'link text'
@@ -429,6 +433,14 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
       run: () => applySlashReplacement('> '),
     },
     {
+      id: 'divider',
+      label: 'Divider',
+      description: 'Insert a horizontal rule',
+      keywords: ['divider', 'hr', 'horizontal', 'rule', 'line'],
+      icon: <Minus className="h-4 w-4" />,
+      run: () => applySlashBlock('---'),
+    },
+    {
       id: 'heading',
       label: 'Heading',
       description: 'Insert a level-1 heading',
@@ -577,6 +589,9 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
           <ToolbarButton label="Quote" onClick={() => prefixLine('> ')}>
             <Quote className="h-4 w-4" />
           </ToolbarButton>
+          <ToolbarButton label="Divider" onClick={insertDivider}>
+            <Minus className="h-4 w-4" />
+          </ToolbarButton>
           <div className="mx-1 h-6 w-px bg-border" />
           <ToolbarButton label="Code Block" onClick={() => insertBlock('```ts\n// code\n```')}>
             <span className="font-mono text-xs">&lt;/&gt;</span>
@@ -698,7 +713,7 @@ export default function MarkdownEditor({ initialContent = '', onChange }: Markdo
           Mermaid block: <code>{'```mermaid ... ```'}</code>
         </p>
         <p>
-          Slash commands: <code>/code /mermaid /table /image /bullet /ordered /quote /heading /link /video</code>
+          Slash commands: <code>/code /mermaid /table /image /bullet /ordered /quote /divider /heading /link /video</code>
         </p>
         <p>
           Paste image: <code>Ctrl/Cmd + V</code> (클립보드 이미지를 자동 업로드 후 Image toolbox에 채웁니다)

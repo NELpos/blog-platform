@@ -71,9 +71,11 @@ export default async function BlogParamsPage({
       </header>
 
       <main className="container-shell py-14 md:py-20">
-        <div className="mx-auto mb-14 max-w-3xl text-center">
+        <div className="mx-auto mb-14 max-w-3xl text-center md:text-left">
           <p className="mb-3 text-sm font-medium tracking-wide text-primary">Blog</p>
-          <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">{workspace.name}</h1>
+          <h1 className="mx-auto mb-4 max-w-[22ch] text-4xl font-bold leading-[1.15] tracking-tight md:mx-0 md:max-w-[28ch] md:text-5xl">
+            {workspace.name}
+          </h1>
           <p className="text-lg text-muted-foreground">Stories, notes, and technical writing by {workspace.name}.</p>
         </div>
 
